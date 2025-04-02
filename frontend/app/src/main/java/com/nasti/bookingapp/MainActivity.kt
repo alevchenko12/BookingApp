@@ -19,6 +19,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
+                // Call loadUsers() inside a LaunchedEffect to trigger the fetching when the composable is first loaded
+                LaunchedEffect(Unit) {
+                    userViewModel.loadUsers()  // This will call the loadUsers function
+                }
                 UserScreen(userViewModel)
             }
         }
@@ -27,7 +31,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun UserScreen(userViewModel: UserViewModel) {
+    // Observe the users state
     val users by userViewModel.users.collectAsState(initial = emptyList())
+
+    // Print users list to the terminal
+    println("Users List: $users")  // This will print the users list in the terminal
 
     Scaffold { padding ->
         Column(
