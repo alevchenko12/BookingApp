@@ -61,3 +61,7 @@ fabric.properties
 
 # Ignore any other temporary IDE files
 *.~*
+
+__pycache__/
+*.pyc
+*.pyo
