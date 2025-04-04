@@ -17,3 +17,4 @@ class Hotel(Base):
 
     # Relationships
     city = relationship("City", back_populates="hotels")
+    rooms = relationship("Room", back_populates="hotel")
