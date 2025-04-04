@@ -11,6 +11,7 @@ class City(Base):
 
     # Relationship: A city belongs to one country
     country = relationship("Country", back_populates="cities")
+    hotels = relationship("Hotel", back_populates="city")
 
     def __repr__(self):
         return f"<City(id={self.id}, name={self.name}, country_id={self.country_id})>"
