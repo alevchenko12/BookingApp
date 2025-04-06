@@ -65,3 +65,8 @@ fabric.properties
 __pycache__/
 *.pyc
 *.pyo
+
+# Ignore Alembic compiled Python files
+alembic/versions/__pycache__/
+*.pyc
+*.pyo
