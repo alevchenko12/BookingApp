@@ -25,6 +25,9 @@ class Booking(Base):
     # One-to-Many Relationship with Reviews
     reviews = relationship("Review", back_populates="booking", cascade="none")  # No cascade delete for reviews
 
+    # One-to-One relationship with Cancellation
+    cancellation = relationship("Cancellation", back_populates="booking", uselist=False, cascade="all, delete-orphan")
+
     # Custom methods to handle booking cancellation when the room is deleted
     def cancel_booking(self):
         self.status = "cancelled"

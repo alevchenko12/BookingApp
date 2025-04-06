@@ -27,3 +27,7 @@ class User(Base):
 
     # Relationship with reviews (One-to-Many)
     reviews = relationship("Review", back_populates="user", cascade="none")  # No cascade delete for reviews
+
+    owned_hotels = relationship("Hotel", back_populates="owner", cascade="all, delete-orphan")
+
+    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")

@@ -15,6 +15,11 @@ class Hotel(Base):
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
 
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    
+    # Add this relationship
+    owner = relationship("User", back_populates="owned_hotels")
+
     # Relationships
     city = relationship("City", back_populates="hotels", cascade="all, delete-orphan")  # Delete hotels when a city is deleted
     rooms = relationship("Room", back_populates="hotel", cascade="none")  # No delete cascade on rooms

@@ -6,7 +6,7 @@ class Payment(Base):
     __tablename__ = "payments"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)  # Payment ID
-    booking_id = Column(Integer, ForeignKey("bookings.id", ondelete="CASCADE"), nullable=False)  # Reference to Booking
+    booking_id = Column(Integer, ForeignKey("bookings.id", ondelete="CASCADE"), unique=True, nullable=False)# Reference to Booking
     payment_date = Column(Date, nullable=False)  # Date when payment was made
     payment_method = Column(String(50), nullable=False)  # Payment method (e.g., "Credit Card", "UPI")
     amount = Column(Float, nullable=False)  # Total payment amount
