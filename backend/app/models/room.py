@@ -11,7 +11,6 @@ class Room(Base):
     price_per_night = Column(Float, nullable=False)  # Price per night for the room
     capacity = Column(Integer, nullable=False)  # Max number of people the room can accommodate
     description = Column(String(500), nullable=True)  # Room description
-    available = Column(Boolean, default=True)  # Whether the room is available for booking
     hotel_id = Column(Integer, ForeignKey("hotels.id", ondelete="SET NULL"), nullable=True)  # Keep room even if hotel is deleted
 
     # Room facilities (attributes)
@@ -30,5 +29,8 @@ class Room(Base):
     # Relationships with hotel
     hotel = relationship("Hotel", back_populates="rooms")
 
-   # One-to-Many: Room can have multiple bookings (No cascade delete on the Room side)
-    bookings = relationship("Booking", back_populates="room", cascade="none")
+    # One-to-Many: Room can have multiple bookings (No cascade delete on the Room side)
+    bookings = relationship("Booking", back_populates="room", cascade="none")   
+
+    # One-to-Many: Room can have multiple availability records
+    availability = relationship("RoomAvailability", back_populates="room", cascade="all, delete-orphan")

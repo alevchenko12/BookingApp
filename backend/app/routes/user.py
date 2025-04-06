@@ -1,5 +1,5 @@
 from fastapi import APIRouter 
-from config.db import connection 
+from app.config.database import connection 
 from models.index import user
 
 
