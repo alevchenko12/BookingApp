@@ -22,6 +22,8 @@ class Booking(Base):
     # One-to-One Relationship with Payment
     payment = relationship("Payment", back_populates="booking", uselist=False, cascade="all, delete-orphan")  # Automatically delete payment when booking is deleted
 
+    # One-to-Many Relationship with Reviews
+    reviews = relationship("Review", back_populates="booking", cascade="none")  # No cascade delete for reviews
 
     # Custom methods to handle booking cancellation when the room is deleted
     def cancel_booking(self):

@@ -24,3 +24,6 @@ class User(Base):
 
     # Relationship with bookings
     bookings = relationship("Booking", back_populates="user", cascade="none")  # No cascade delete
+
+    # Relationship with reviews (One-to-Many)
+    reviews = relationship("Review", back_populates="user", cascade="none")  # No cascade delete for reviews
