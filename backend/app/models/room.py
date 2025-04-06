@@ -23,7 +23,7 @@ class Room(Base):
     has_kitchen = Column(Boolean, default=False)  # Whether the room has a kitchen
     has_safe = Column(Boolean, default=False)  # Whether the room has a safe
 
-    # Cancellation policy (can be implemented using Enum or String)
+    # Cancellation policy (can be implemented using Enum)
     cancellation_policy = Column(String(255), nullable=True)  # e.g., "Flexible", "Non-refundable"
 
     # Relationships with hotel

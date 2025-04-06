@@ -1,0 +1,14 @@
+# app/models/__init__.py
+
+from .user import User
+from .user_role import UserRole
+from .hotel import Hotel
+from .room import Room
+from .room_availability import RoomAvailability
+from .review import Review
+from .payment import Payment
+from .hotel_photo import HotelPhoto
+from .country import Country
+from .city import City
+from .cancellation import Cancellation
+from .booking import Booking
