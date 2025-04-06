@@ -12,7 +12,7 @@ class Room(Base):
     capacity = Column(Integer, nullable=False)  # Max number of people the room can accommodate
     description = Column(String(500), nullable=True)  # Room description
     available = Column(Boolean, default=True)  # Whether the room is available for booking
-    hotel_id = Column(Integer, ForeignKey("hotels.id"), nullable=False)  # The hotel the room belongs to
+    hotel_id = Column(Integer, ForeignKey("hotels.id", ondelete="SET NULL"), nullable=True)  # Keep room even if hotel is deleted
 
     # Room facilities (attributes)
     has_wifi = Column(Boolean, default=False)  # Whether the room has Wi-Fi
@@ -27,8 +27,8 @@ class Room(Base):
     # Cancellation policy (can be implemented using Enum or String)
     cancellation_policy = Column(String(255), nullable=True)  # e.g., "Flexible", "Non-refundable"
 
-    # Ratings and Reviews will be handled separately (see below)
-    reviews = relationship("Review", back_populates="room")
-    
     # Relationships with hotel
     hotel = relationship("Hotel", back_populates="rooms")
+
+   # One-to-Many: Room can have multiple bookings (No cascade delete on the Room side)
+    bookings = relationship("Booking", back_populates="room", cascade="none")

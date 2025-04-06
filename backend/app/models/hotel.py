@@ -11,10 +11,11 @@ class Hotel(Base):
     stars = Column(Integer, nullable=True)
     description = Column(String(500), nullable=True)
 
-    city_id = Column(Integer, ForeignKey("cities.id"), nullable=False)
+    city_id = Column(Integer, ForeignKey("cities.id", ondelete="CASCADE"), nullable=False)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
 
     # Relationships
-    city = relationship("City", back_populates="hotels")
-    rooms = relationship("Room", back_populates="hotel")
+    city = relationship("City", back_populates="hotels", cascade="all, delete-orphan")  # Delete hotels when a city is deleted
+    rooms = relationship("Room", back_populates="hotel", cascade="none")  # No delete cascade on rooms
+    photos = relationship("HotelPhoto", back_populates="hotel", cascade="all, delete")

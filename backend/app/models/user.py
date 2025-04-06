@@ -22,5 +22,5 @@ class User(Base):
     # Password hash (For security, passwords are never stored in plain text)
     password_hash = Column(String, nullable=False)
 
-    # Optional relationship with other tables (e.g., Bookings, etc.)
-    # bookings = relationship("Booking", back_populates="user")
+    # Relationship with bookings
+    bookings = relationship("Booking", back_populates="user", cascade="none")  # No cascade delete

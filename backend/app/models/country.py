@@ -9,7 +9,7 @@ class Country(Base):
     name = Column(String, unique=True, nullable=False)
 
     # Relationship: A country can have multiple cities
-    cities = relationship("City", back_populates="country")
+    cities = relationship("City", back_populates="country", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Country(id={self.id}, name={self.name})>"

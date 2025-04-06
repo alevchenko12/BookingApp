@@ -7,11 +7,11 @@ class City(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     name = Column(String, nullable=False)
-    country_id = Column(Integer, ForeignKey('countries.id'), nullable=False)
+    country_id = Column(Integer, ForeignKey("countries.id", ondelete="CASCADE"), nullable=False)
 
     # Relationship: A city belongs to one country
     country = relationship("Country", back_populates="cities")
-    hotels = relationship("Hotel", back_populates="city")
+    hotels = relationship("Hotel", back_populates="city", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<City(id={self.id}, name={self.name}, country_id={self.country_id})>"
