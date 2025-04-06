@@ -8,7 +8,7 @@ class RoomAvailability(Base):
 
     id = Column(Integer, primary_key=True)
     room_id = Column(Integer, ForeignKey("rooms.id", ondelete="CASCADE"))
-    date = Column(Date, nullable=False)
+    date = Column(Date, nullable=False, index=True)
     is_available = Column(Boolean, default=False)  # False means booked or blocked, True means available
     price_override = Column(Float, nullable=True)  # Optional custom price for the room on this date
     

@@ -6,7 +6,7 @@ class City(Base):
     __tablename__ = 'cities'
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, index=True)
     country_id = Column(Integer, ForeignKey("countries.id", ondelete="CASCADE"), nullable=False)
 
     # Relationship: A city belongs to one country
