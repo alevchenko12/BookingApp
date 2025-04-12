@@ -1,10 +1,12 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, TYPE_CHECKING, List
 from pydantic import BaseModel, Field, StringConstraints
 
 from schemas.city import CityRead
 from schemas.user import UserRead
-from schemas.room import RoomRead  # define this
-from schemas.hotel_photo import HotelPhotoRead  # define this
+from schemas.hotel_photo import HotelPhotoRead  
+
+if TYPE_CHECKING:
+    from schemas.room import RoomRead  # only used for type hinting
 
 # Reusable constraints
 HotelStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
