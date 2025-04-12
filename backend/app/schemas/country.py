@@ -1,24 +1,33 @@
-from typing import List, Annotated
+from typing import List, Annotated, TYPE_CHECKING
 from pydantic import BaseModel, StringConstraints
-from schemas.city import CityRead 
-# Custom string type with constraints
+
+# Prevent runtime import loop
+if TYPE_CHECKING:
+    from schemas.city import CityRead
+
 NameStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
 
-# Base schema shared by multiple uses
+# Base schema
 class CountryBase(BaseModel):
     name: NameStr
 
-# Schema for creating a country
+# Create schema
 class CountryCreate(CountryBase):
     pass
 
-# Schema for reading a country
+# Read schema
 class CountryRead(CountryBase):
     id: int
 
     class Config:
         orm_mode = True
 
-# Schema for returning a country with its cities
+# Read schema with cities
 class CountryWithCities(CountryRead):
-    cities: List[CityRead] = []
+    cities: List["CityRead"] = []
+
+    class Config:
+        orm_mode = True
+
+# Required to resolve forward refs in Pydantic v2
+CountryWithCities.model_rebuild()
