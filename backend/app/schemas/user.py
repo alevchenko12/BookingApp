@@ -1,11 +1,11 @@
 from typing import Annotated, TYPE_CHECKING
 from pydantic import BaseModel, EmailStr, StringConstraints
-from schemas.booking import BookingRead
-from schemas.review import ReviewRead
 from schemas.user_role import UserRoleRead
 
 if TYPE_CHECKING:
-    from schemas.hotel import HotelRead  # imported only during type checking
+    from schemas.review import ReviewRead
+    from schemas.booking import BookingRead
+    from schemas.hotel import HotelRead
 
 # Reusable types
 NameStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
@@ -32,9 +32,9 @@ class UserRead(UserBase):
 
 # Read with related info
 class UserWithRelations(UserRead):
-    bookings: list[BookingRead] = []
-    reviews: list[ReviewRead] = []
-    owned_hotels: list["HotelRead"] = [] 
+    bookings: list["BookingRead"] = []
+    reviews: list["ReviewRead"] = []
+    owned_hotels: list["HotelRead"] = []
     roles: list[UserRoleRead] = []
 
     class Config:
