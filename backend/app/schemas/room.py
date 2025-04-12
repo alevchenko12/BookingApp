@@ -1,19 +1,20 @@
 from enum import Enum
 from typing import Optional, Annotated
 from pydantic import BaseModel, Field, StringConstraints
-from schemas.hotel import HotelRead  # Assumes you already have HotelRead schema
+from schemas.hotel import HotelRead  # Assuming you already have this
 
-# Enums for Room Options
+# Enum for Room Type
 class RoomTypeEnum(str, Enum):
     single = "Single"
     double = "Double"
     suite = "Suite"
 
+# Enum for Cancellation Policy
 class CancellationPolicyEnum(str, Enum):
     flexible = "Flexible"
     non_refundable = "Non-refundable"
 
-# Annotated Constraints
+# Annotated string constraints
 RoomNameStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
 RoomDescStr = Annotated[Optional[str], StringConstraints(strip_whitespace=True, max_length=500)]
 
@@ -24,10 +25,9 @@ class RoomBase(BaseModel):
     price_per_night: float = Field(gt=0)
     capacity: int = Field(gt=0)
     description: RoomDescStr = None
-    hotel_id: Optional[int] = None  # Nullable if hotel is deleted
     cancellation_policy: Optional[CancellationPolicyEnum] = None
 
-    # Facilities — default all to False
+    # Facilities — all default to False
     has_wifi: bool = False
     allows_pets: bool = False
     has_air_conditioning: bool = False
@@ -39,11 +39,12 @@ class RoomBase(BaseModel):
 
 # Create Schema
 class RoomCreate(RoomBase):
-    pass
+    hotel_id: int  # Required when creating a room
 
 # Read Schema
 class RoomRead(RoomBase):
     id: int
+    hotel_id: Optional[int] = None  # Nullable if hotel was deleted
 
     class Config:
         orm_mode = True
