@@ -1,4 +1,4 @@
-from typing import Annotated, TYPE_CHECKING
+from typing import Annotated, Optional, TYPE_CHECKING
 from pydantic import BaseModel, EmailStr, StringConstraints
 from schemas.user_role import UserRoleRead
 
@@ -41,3 +41,8 @@ class UserWithRelations(UserRead):
         orm_mode = True
 
 UserWithRelations.model_rebuild()
+
+class UserUpdate(BaseModel):
+    first_name: Optional[NameStr] = None
+    last_name: Optional[NameStr] = None
+    phone: Optional[PhoneStr] = None
