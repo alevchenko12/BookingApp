@@ -62,3 +62,18 @@ def delete_city(db: Session, city_id: int) -> bool:
     except:
         db.rollback()
         return False
+
+def search_cities_by_prefix(db: Session, query: str, country_id: Optional[int] = None, limit: int = 10) -> List[City]:
+    """
+    Return a list of cities that start with the given query string.
+    Optionally filter by country.
+    """
+    if not query:
+        return []
+
+    q = db.query(City).filter(City.name.ilike(f"{query}%"))
+
+    if country_id:
+        q = q.filter(City.country_id == country_id)
+
+    return q.order_by(City.name.asc()).limit(limit).all()
