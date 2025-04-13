@@ -64,3 +64,19 @@ def delete_country(db: Session, country_id: int) -> bool:
     except:
         db.rollback()
         return False
+
+def search_countries_by_prefix(db: Session, query: str, limit: int = 10) -> List[Country]:
+    """
+    Return a list of countries whose names start with the given query string.
+    Useful for autocomplete suggestions.
+    """
+    if not query:
+        return []
+
+    return (
+        db.query(Country)
+        .filter(Country.name.ilike(f"{query}%"))
+        .order_by(Country.name.asc())
+        .limit(limit)
+        .all()
+    )
