@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Annotated
 from pydantic import BaseModel, Field, StringConstraints
-from schemas.hotel import HotelRead  # Assuming you already have this
+from schemas.hotel import HotelRead 
 
 # Enum for Room Type
 class RoomTypeEnum(str, Enum):
@@ -52,3 +52,19 @@ class RoomRead(RoomBase):
 # Extended Schema (Room with Hotel)
 class RoomWithHotel(RoomRead):
     hotel: Optional[HotelRead] = None
+
+class RoomUpdate(BaseModel):
+    name: Optional[RoomNameStr] = None
+    room_type: Optional[RoomTypeEnum] = None
+    price_per_night: Optional[float] = Field(gt=0, default=None)
+    capacity: Optional[int] = Field(gt=0, default=None)
+    description: RoomDescStr = None
+    cancellation_policy: Optional[CancellationPolicyEnum] = None
+    has_wifi: Optional[bool] = None
+    allows_pets: Optional[bool] = None
+    has_air_conditioning: Optional[bool] = None
+    has_tv: Optional[bool] = None
+    has_minibar: Optional[bool] = None
+    has_balcony: Optional[bool] = None
+    has_kitchen: Optional[bool] = None
+    has_safe: Optional[bool] = None
