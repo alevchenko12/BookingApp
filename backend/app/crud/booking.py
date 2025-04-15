@@ -1,6 +1,7 @@
-from datetime import date, timedelta
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from datetime import date, timedelta
 from typing import Optional, List
 
 from models.booking import Booking
@@ -9,26 +10,36 @@ from models.user import User
 from models.room_availability import RoomAvailability
 from schemas.booking import BookingCreate, BookingStatusEnum
 from schemas.room_availability import RoomAvailabilityCreate
-from crud.room_availability import is_room_available_for_range, create_availability_entry
+from schemas.cancellation import CancellationCreate
+from crud.room_availability import create_availability_entry
+from crud.room_availability import is_room_available_for_range
+from crud.cancellation import create_cancellation
 
 def create_booking(db: Session, booking_in: BookingCreate) -> Optional[Booking]:
     """
     Create a new booking if the room is available for the selected dates.
-    Automatically blocks the room by creating RoomAvailability entries.
-    Status defaults to 'pending'.
+    Adds RoomAvailability entries to block the room. Handles race conditions via row locking.
     """
 
-    # 1. Validate date range
-    if booking_in.check_out_date <= booking_in.check_in_date:
-        return None  # Invalid: check-out must be after check-in
+    # 0. Check that date range is valid
+    if booking_in.check_in_date >= booking_in.check_out_date:
+        return None
 
-    # 2. Check foreign keys
+    # 1. Validate user and room exist
     if not db.query(User).filter(User.id == booking_in.user_id).first():
         return None
-    if not db.query(Room).filter(Room.id == booking_in.room_id).first():
+    room = db.query(Room).filter(Room.id == booking_in.room_id).first()
+    if not room:
         return None
 
-    # 3. Ensure room is available for the whole date range
+    # 2. Lock potential availability conflicts before checking
+    db.query(RoomAvailability).filter(
+        RoomAvailability.room_id == booking_in.room_id,
+        RoomAvailability.date >= booking_in.check_in_date,
+        RoomAvailability.date < booking_in.check_out_date
+    ).with_for_update().all()
+
+    # 3. Check room availability for range (assumes unavailable entries mean blocked)
     if not is_room_available_for_range(db, booking_in.room_id, booking_in.check_in_date, booking_in.check_out_date):
         return None
 
@@ -51,7 +62,7 @@ def create_booking(db: Session, booking_in: BookingCreate) -> Optional[Booking]:
         db.rollback()
         return None
 
-    # 5. Add room unavailability entries for each day in the range
+    # 5. Add availability entries (booked days)
     delta = (booking.check_out_date - booking.check_in_date).days
     for i in range(delta):
         day = booking.check_in_date + timedelta(days=i)
@@ -62,7 +73,12 @@ def create_booking(db: Session, booking_in: BookingCreate) -> Optional[Booking]:
             is_available=False,
             price_override=None
         )
-        create_availability_entry(db, availability_entry)
+
+        try:
+            create_availability_entry(db, availability_entry)
+        except IntegrityError:
+            db.rollback()
+            return None  # Race condition fallback
 
     return booking
 
@@ -79,7 +95,6 @@ def get_bookings_by_user(db: Session, user_id: int) -> List[Booking]:
     """
     return db.query(Booking).filter(Booking.user_id == user_id).order_by(Booking.check_in_date.desc()).all()
 
-from crud_cancellation import create_cancellation
 def cancel_booking(db: Session, booking_id: int, refund_amount: float = 0.0) -> bool:
     booking = get_booking_by_id(db, booking_id)
     if not booking or booking.status == BookingStatusEnum.cancelled or booking.status == BookingStatusEnum.completed:
