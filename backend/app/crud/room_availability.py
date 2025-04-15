@@ -12,17 +12,41 @@ from schemas.room_availability import RoomAvailabilityCreate
 
 def create_availability_entry(db: Session, availability_in: RoomAvailabilityCreate) -> Optional[RoomAvailability]:
     """
-    Add an availability record for a room on a specific date.
-    Typically used to mark it as unavailable (booked).
+    Adds an availability record marking the room as unavailable (booked) for a specific date.
+    If the room is already unavailable for that date, it returns None.
     """
-    # FK check — ensure room exists
+
+    # Check room existence
     if not db.query(Room).filter(Room.id == availability_in.room_id).first():
         return None
 
+    # Check if there's already a record and the room is unavailable
+    existing = db.query(RoomAvailability).filter(
+        RoomAvailability.room_id == availability_in.room_id,
+        RoomAvailability.date == availability_in.date
+    ).first()
+
+    if existing:
+        if not existing.is_available:
+            # Room already unavailable for this date
+            return None
+        else:
+            # Overwrite availability to unavailable
+            existing.is_available = False
+            existing.price_override = availability_in.price_override
+            try:
+                db.commit()
+                db.refresh(existing)
+                return existing
+            except IntegrityError:
+                db.rollback()
+                return None
+
+    # Create new unavailability record
     availability = RoomAvailability(
         room_id=availability_in.room_id,
         date=availability_in.date,
-        is_available=availability_in.is_available,
+        is_available=False,  # Explicitly set to False
         price_override=availability_in.price_override
     )
 
@@ -34,6 +58,7 @@ def create_availability_entry(db: Session, availability_in: RoomAvailabilityCrea
     except IntegrityError:
         db.rollback()
         return None
+
 
 def is_room_available_for_range(db: Session, room_id: int, check_in: date, check_out: date) -> bool:
     """
