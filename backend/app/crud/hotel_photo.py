@@ -28,6 +28,8 @@ def create_hotel_photo(db: Session, photo_in: HotelPhotoCreate) -> Optional[Hote
         db.rollback()
         return None
 
+def get_photo_by_id(db: Session, photo_id: int) -> Optional[HotelPhoto]:
+    return db.query(HotelPhoto).filter(HotelPhoto.id == photo_id).first()
 
 def get_photos_by_hotel(db: Session, hotel_id: int) -> List[HotelPhoto]:
     """Retrieve all photos for a given hotel."""
