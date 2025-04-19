@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
-from models.country import Country
-from schemas.country import CountryCreate
+from app.models.country import Country
+from app.schemas.country import CountryCreate
 from typing import List, Optional
 
 

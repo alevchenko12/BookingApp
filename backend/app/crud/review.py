@@ -2,11 +2,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
 
-from models.review import Review
-from models.user import User
-from models.booking import Booking
-from models.room import Room
-from schemas.review import ReviewCreate
+from app.models.review import Review
+from app.models.user import User
+from app.models.booking import Booking
+from app.models.room import Room
+from app.schemas.review import ReviewCreate
 
 def create_review(db: Session, review_in: ReviewCreate) -> Optional[Review]:
     """

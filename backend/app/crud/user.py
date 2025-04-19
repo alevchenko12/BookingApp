@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
-from models.user import User
-from schemas.user import UserCreate, UserUpdate
+from app.models.user import User
+from app.schemas.user import UserCreate, UserUpdate
 from passlib.context import CryptContext
 
 # Password hashing context

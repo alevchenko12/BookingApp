@@ -2,10 +2,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Optional
 
-from models.payment import Payment
-from models.booking import Booking
-from schemas.payment import PaymentCreate
-from crud.booking import mark_booking_as_confirmed
+from app.models.payment import Payment
+from app.models.booking import Booking
+from app.schemas.payment import PaymentCreate
+from app.crud.booking import mark_booking_as_confirmed
 
 
 def create_payment(db: Session, payment_in: PaymentCreate) -> Optional[Payment]:

@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Optional
-from models.cancellation import Cancellation
-from models.booking import Booking
-from schemas.cancellation import CancellationCreate
+from app.models.cancellation import Cancellation
+from app.models.booking import Booking
+from app.schemas.cancellation import CancellationCreate
 
 def create_cancellation(db: Session, cancellation_in: CancellationCreate) -> Optional[Cancellation]:
     """

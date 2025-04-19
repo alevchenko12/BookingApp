@@ -6,9 +6,9 @@ from datetime import timedelta
 
 from typing import List, Optional
 
-from models.room_availability import RoomAvailability
-from models.room import Room
-from schemas.room_availability import RoomAvailabilityCreate
+from app.models.room_availability import RoomAvailability
+from app.models.room import Room
+from app.schemas.room_availability import RoomAvailabilityCreate
 
 def create_availability_entry(db: Session, availability_in: RoomAvailabilityCreate) -> Optional[RoomAvailability]:
     """

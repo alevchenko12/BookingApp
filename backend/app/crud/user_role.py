@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
-from models.user_role import UserRole
-from schemas.user_role import UserRoleCreate
-from models.user import User
+from app.models.user_role import UserRole
+from app.schemas.user_role import UserRoleCreate
+from app.models.user import User
 
 
 def assign_user_role(db: Session, role_in: UserRoleCreate) -> Optional[UserRole]:

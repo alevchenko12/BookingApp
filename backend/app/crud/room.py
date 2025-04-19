@@ -3,10 +3,10 @@ from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
 from sqlalchemy import and_
 
-from models.room import Room
-from models.hotel import Hotel
-from schemas.room import RoomCreate
-from schemas.room import RoomUpdate 
+from app.models.room import Room
+from app.models.hotel import Hotel
+from app.schemas.room import RoomCreate
+from app.schemas.room import RoomUpdate 
 
 def create_room(db: Session, room_in: RoomCreate) -> Optional[Room]:
     """

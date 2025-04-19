@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
-from models.city import City
-from schemas.city import CityCreate
+from app.models.city import City
+from app.schemas.city import CityCreate
 
 
 def create_city(db: Session, city_in: CityCreate) -> Optional[City]:

@@ -3,9 +3,9 @@ from sqlalchemy.exc import IntegrityError
 from typing import List, Optional  
 from sqlalchemy import func
 
-from models.hotel import Hotel
-from models.city import City
-from models.user import User
+from app.models.hotel import Hotel
+from app.models.city import City
+from app.models.user import User
 
 from schemas.hotel import HotelCreate, HotelUpdate
 
@@ -64,6 +64,11 @@ def get_all_hotels(db: Session) -> List[Hotel]:
     """
     return db.query(Hotel).order_by(Hotel.name.asc()).all()
 
+def get_hotels_by_owner(db: Session, owner_id: int) -> List[Hotel]:
+    """
+    Retrieve all hotels created by a specific user (owner).
+    """
+    return db.query(Hotel).filter(Hotel.owner_id == owner_id).order_by(Hotel.name.asc()).all()
 
 def update_hotel(db: Session, hotel_id: int, hotel_update: HotelUpdate) -> Optional[Hotel]:
     """

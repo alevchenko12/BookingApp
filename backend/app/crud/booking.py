@@ -4,16 +4,16 @@ from sqlalchemy.exc import IntegrityError
 from datetime import date, timedelta
 from typing import Optional, List
 
-from models.booking import Booking
-from models.room import Room
-from models.user import User
-from models.room_availability import RoomAvailability
-from schemas.booking import BookingCreate, BookingStatusEnum
-from schemas.room_availability import RoomAvailabilityCreate
-from schemas.cancellation import CancellationCreate
-from crud.room_availability import create_availability_entry
-from crud.room_availability import is_room_available_for_range
-from crud.cancellation import create_cancellation
+from app.models.booking import Booking
+from app.models.room import Room
+from app.models.user import User
+from app.models.room_availability import RoomAvailability
+from app.schemas.booking import BookingCreate, BookingStatusEnum
+from app.schemas.room_availability import RoomAvailabilityCreate
+from app.schemas.cancellation import CancellationCreate
+from app.crud.room_availability import create_availability_entry
+from app.crud.room_availability import is_room_available_for_range
+from app.crud.cancellation import create_cancellation
 
 def create_booking(db: Session, booking_in: BookingCreate) -> Optional[Booking]:
     """

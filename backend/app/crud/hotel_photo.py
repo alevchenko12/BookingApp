@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
-from models.hotel_photo import HotelPhoto
-from models.hotel import Hotel
-from schemas.hotel_photo import HotelPhotoCreate
+from app.models.hotel_photo import HotelPhoto
+from app.models.hotel import Hotel
+from app.schemas.hotel_photo import HotelPhotoCreate
 
 
 def create_hotel_photo(db: Session, photo_in: HotelPhotoCreate) -> Optional[HotelPhoto]:
