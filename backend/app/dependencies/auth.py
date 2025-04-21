@@ -5,10 +5,10 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from config.jwt_config import SECRET_KEY, ALGORITHM
-from config.database import get_db
-from crud.user import get_user_by_email
-from models.user import User
+from app.config.jwt_config import SECRET_KEY, ALGORITHM
+from app.config.database import get_db
+from app.crud.user import get_user_by_email
+from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
@@ -30,5 +30,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = get_user_by_email(db, email)
     if user is None:
         raise credentials_exception
+    
+    print("Decoded email from token:", email)
+
 
     return user

@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
 from app.models.user import User
+from app.models.booking import Booking
 from app.schemas.user import UserCreate, UserUpdate
 from passlib.context import CryptContext
 
@@ -42,8 +43,6 @@ def create_user(db: Session, user_in: UserCreate) -> Optional[User]:
         db.rollback()
         return None
 
-
-from models.booking import Booking
 
 def delete_user(db: Session, user_id: int) -> bool:
     """Delete a user only if they have no pending or confirmed bookings."""
