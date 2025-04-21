@@ -86,13 +86,40 @@ def search_hotel_list(
         radius_km=radius_km,
     )
 
-@router.get("/owner/{owner_id}", response_model=List[HotelRead])
+@router.get("/owner/{owner_id}")
 def hotels_by_owner(owner_id: int, db: Session = Depends(get_db)):
     """
-    Get all hotels created by a specific user (owner).
+    Get all hotels created by a specific user (owner), including owner info.
     """
     hotels = get_hotels_by_owner(db, owner_id)
-    return hotels
+
+    if not hotels:
+        raise HTTPException(status_code=404, detail="No hotels found for this owner")
+
+    return [
+        {
+            "id": hotel.id,
+            "name": hotel.name,
+            "address": hotel.address,
+            "description": hotel.description,
+            "stars": hotel.stars,
+            "latitude": hotel.latitude,
+            "longitude": hotel.longitude,
+            "city": {
+                "id": hotel.city.id,
+                "name": hotel.city.name
+            } if hotel.city else None,
+            "owner": {
+                "id": hotel.owner.id,
+                "first_name": hotel.owner.first_name,
+                "last_name": hotel.owner.last_name,
+                "email": hotel.owner.email
+            } if hotel.owner else None,
+            "rooms": hotel.rooms,
+            "photos": hotel.photos
+        }
+        for hotel in hotels
+    ]
 
 
 @router.get("/my-hotels", response_model=List[HotelRead])
