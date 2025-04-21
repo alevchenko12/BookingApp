@@ -1,24 +1,33 @@
-from enum import Enum
-from typing import Optional, Annotated
-from pydantic import BaseModel, Field, StringConstraints
-from schemas.hotel import HotelRead 
+from __future__ import annotations
 
-# Enum for Room Type
+from enum import Enum
+from typing import Optional, Annotated, TYPE_CHECKING
+from pydantic import BaseModel, Field, StringConstraints
+
+if TYPE_CHECKING:
+    pass  # Removed HotelRead to break circular import
+
+# -----------------------
+# ENUMS
+# -----------------------
 class RoomTypeEnum(str, Enum):
     single = "Single"
     double = "Double"
     suite = "Suite"
 
-# Enum for Cancellation Policy
 class CancellationPolicyEnum(str, Enum):
     flexible = "Flexible"
     non_refundable = "Non-refundable"
 
-# Annotated string constraints
+# -----------------------
+# Shared annotated types
+# -----------------------
 RoomNameStr = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
 RoomDescStr = Annotated[Optional[str], StringConstraints(strip_whitespace=True, max_length=500)]
 
-# Base Schema (Shared Fields)
+# -----------------------
+# Base schema
+# -----------------------
 class RoomBase(BaseModel):
     name: RoomNameStr
     room_type: RoomTypeEnum
@@ -26,8 +35,6 @@ class RoomBase(BaseModel):
     capacity: int = Field(gt=0)
     description: RoomDescStr = None
     cancellation_policy: Optional[CancellationPolicyEnum] = None
-
-    # Facilities — all default to False
     has_wifi: bool = False
     allows_pets: bool = False
     has_air_conditioning: bool = False
@@ -37,22 +44,25 @@ class RoomBase(BaseModel):
     has_kitchen: bool = False
     has_safe: bool = False
 
-# Create Schema
+# -----------------------
+# Create schema
+# -----------------------
 class RoomCreate(RoomBase):
-    hotel_id: int  # Required when creating a room
+    hotel_id: int
 
-# Read Schema
+# -----------------------
+# Read schema
+# -----------------------
 class RoomRead(RoomBase):
     id: int
-    hotel_id: Optional[int] = None  # Nullable if hotel was deleted
+    hotel_id: Optional[int] = None
 
     class Config:
         orm_mode = True
 
-# Extended Schema (Room with Hotel)
-class RoomWithHotel(RoomRead):
-    hotel: Optional[HotelRead] = None
-
+# -----------------------
+# Update schema
+# -----------------------
 class RoomUpdate(BaseModel):
     name: Optional[RoomNameStr] = None
     room_type: Optional[RoomTypeEnum] = None
