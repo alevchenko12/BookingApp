@@ -4,7 +4,12 @@ from typing import Optional, List
 
 from app.config.database import get_db
 from app.schemas.hotel_photo import HotelPhotoCreate, HotelPhotoRead
-from app.crud.hotel_photo import create_hotel_photo, get_photos_by_hotel, delete_hotel_photo
+from app.crud.hotel_photo import (
+    create_hotel_photo,
+    get_photos_by_hotel,
+    delete_hotel_photo,
+    get_photo_by_id
+)
 from app.services.photo_service import save_image_to_disk, delete_image_file, generate_image_url
 
 router = APIRouter(prefix="/photos", tags=["Hotel Photos"])
@@ -17,12 +22,16 @@ def upload_photo(
     caption: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
+    """
+    Upload a hotel photo and save it to the database.
+    Returns the photo with the full image URL.
+    """
     if not file:
         raise HTTPException(status_code=400, detail="File is required")
 
     try:
-        file_path = save_image_to_disk(file)
-        image_url = generate_image_url(file_path)
+        file_path = save_image_to_disk(file)  # returns something like /static/uploads/abc.png
+        image_url = generate_image_url(file_path)  # e.g., http://localhost:8000/static/uploads/abc.png
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image upload failed: {str(e)}")
 
@@ -32,6 +41,7 @@ def upload_photo(
         caption=caption,
         is_cover=None
     )
+
     photo = create_hotel_photo(db, photo_data)
     if not photo:
         raise HTTPException(status_code=400, detail="Failed to save photo to database")
@@ -41,13 +51,17 @@ def upload_photo(
 
 @router.get("/hotel/{hotel_id}", response_model=List[HotelPhotoRead])
 def list_photos(hotel_id: int, db: Session = Depends(get_db)):
+    """
+    Get all photos for a specific hotel.
+    """
     return get_photos_by_hotel(db, hotel_id)
 
 
 @router.delete("/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_photo(photo_id: int, db: Session = Depends(get_db)):
-    from crud.hotel_photo import get_photo_by_id  # ensure exists
-
+    """
+    Delete a photo by ID (removes file from disk and DB).
+    """
     photo = get_photo_by_id(db, photo_id)
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
