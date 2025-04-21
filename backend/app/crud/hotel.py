@@ -7,7 +7,7 @@ from app.models.hotel import Hotel
 from app.models.city import City
 from app.models.user import User
 
-from schemas.hotel import HotelCreate, HotelUpdate
+from app.schemas.hotel import HotelCreate, HotelUpdate
 
 
 def create_hotel(db: Session, hotel_in: HotelCreate) -> Optional[Hotel]:

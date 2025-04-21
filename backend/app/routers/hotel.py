@@ -7,7 +7,7 @@ from app.models.user import User
 from app.schemas.hotel import HotelCreate, HotelRead, HotelUpdate, HotelWithRelations
 from app.crud.hotel import (
     create_hotel, get_hotel_by_id, get_all_hotels,
-    delete_hotel, update_hotel, search_hotels
+    delete_hotel, update_hotel, search_hotels, get_hotels_by_owner
 )
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
@@ -87,7 +87,7 @@ def search_hotel_list(
     )
 
 @router.get("/owner/{owner_id}", response_model=List[HotelRead])
-def get_hotels_by_owner(owner_id: int, db: Session = Depends(get_db)):
+def hotels_by_owner(owner_id: int, db: Session = Depends(get_db)):
     """
     Get all hotels created by a specific user (owner).
     """
