@@ -21,6 +21,6 @@ class Hotel(Base):
     owner = relationship("User", back_populates="owned_hotels")
 
     # Relationships
-    city = relationship("City", back_populates="hotels", cascade="all, delete-orphan")  # Delete hotels when a city is deleted
+    city = relationship("City", back_populates="hotels")  # Delete hotels when a city is deleted
     rooms = relationship("Room", back_populates="hotel", cascade="none")  # No delete cascade on rooms
     photos = relationship("HotelPhoto", back_populates="hotel", cascade="all, delete")
