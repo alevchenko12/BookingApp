@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
+from sqlalchemy.orm import joinedload
 
 from app.models.review import Review
 from app.models.user import User
@@ -75,14 +76,18 @@ def get_reviews_for_hotel(
     sort_desc: bool = True
 ) -> List[Review]:
     """
-    Retrieve all reviews associated with a hotel.
+    Retrieve all reviews associated with a hotel, including user info.
     
     Optional filters:
     - min_rating: filters reviews with rating >= min_rating
     - only_with_text: filters reviews that include a non-empty comment
     - sort_desc: sort reviews by newest first (default True)
     """
-    query = db.query(Review).join(Review.booking).join(Booking.room).filter(
+
+    query = db.query(Review).options(
+        joinedload(Review.user),        
+        joinedload(Review.booking)      
+    ).join(Review.booking).join(Booking.room).filter(
         Room.hotel_id == hotel_id
     )
 
@@ -93,7 +98,7 @@ def get_reviews_for_hotel(
         query = query.filter(Review.text.isnot(None)).filter(Review.text != "")
 
     if sort_desc:
-        query = query.order_by(Review.id.desc())  # or use created_at if you have
+        query = query.order_by(Review.id.desc())
     else:
         query = query.order_by(Review.id.asc())
 
