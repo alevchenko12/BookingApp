@@ -1,38 +1,25 @@
-#FastAPI: A lightweight web framework to create APIs in Python.
-#SQLAlchemy: Used for interacting with the MySQL database.
+# backend/app/main.py
+
 from fastapi import FastAPI
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from app.config.settings import settings
 
-# Database connection
-#REMOVE TO SECRETS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-DATABASE_URL = "mysql+pymysql://root:coursE2025!@localhost/test_db"
+# Routers
+from app.routers import city, country, user, user_role, hotel, room, room_availability, hotel_photo, booking, cancellation, payment, review
+app = FastAPI(
+    title="Booking API",
+    version="1.0.0"
+)
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
-Base = declarative_base()
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-
-# Create tables if they don't exist
-Base.metadata.create_all(bind=engine)
-
-# Initialize FastAPI
-app = FastAPI()
-
-# API to fetch all users
-@app.get("/users")
-def get_users():
-    session = SessionLocal()
-    users = session.query(User).all()
-    session.close()
-    return users
-
-# Run the server: `uvicorn app.main:app --reload`
-
+# Register all routers
+app.include_router(user.router)
+app.include_router(hotel.router)
+app.include_router(city.router)
+app.include_router(country.router)
+app.include_router(hotel_photo.router)
+app.include_router(user_role.router)
+app.include_router(room.router)
+app.include_router(room_availability.router)
+app.include_router(booking.router)
+app.include_router(cancellation.router)
+app.include_router(payment.router)
+app.include_router(review.router)
