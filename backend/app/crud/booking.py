@@ -14,6 +14,7 @@ from app.schemas.cancellation import CancellationCreate
 from app.crud.room_availability import create_availability_entry
 from app.crud.room_availability import is_room_available_for_range
 from app.crud.cancellation import create_cancellation
+from app.schemas.booking import BookingStatusEnum
 
 def create_booking(db: Session, booking_in: BookingCreate) -> Optional[Booking]:
     """
@@ -153,11 +154,6 @@ def mark_booking_as_confirmed(db: Session, booking_id: int) -> bool:
 #Run this once a day (e.g. with Celery, cronjob, or FastAPI’s BackgroundTasks).
 #It will silently clean up outdated confirmed bookings and mark them as completed.
 #############################
-from datetime import date
-from sqlalchemy.orm import Session
-from models.booking import Booking
-from schemas.booking import BookingStatusEnum
-
 def complete_and_cleanup_bookings(db: Session) -> dict:
     """
     - Mark confirmed bookings as completed if check-out has passed.

@@ -1,25 +1,24 @@
 from datetime import date
 from enum import Enum
-from typing import Optional, Annotated
+from typing import Optional, Annotated, TYPE_CHECKING
 
-from pydantic import BaseModel, StringConstraints
-from schemas.user import UserRead
-from schemas.room import RoomRead
-from schemas.payment import PaymentRead
-from schemas.cancellation import CancellationRead
-from schemas.review import ReviewRead
+from pydantic import BaseModel, Field, StringConstraints
+from app.schemas.user import UserRead
+from app.schemas.room import RoomRead
+from app.schemas.payment import PaymentRead
+from app.schemas.cancellation import CancellationRead
 
-# Enum for booking status
+if TYPE_CHECKING:
+    from app.schemas.review import ReviewRead
+
 class BookingStatusEnum(str, Enum):
     pending = "pending"
     confirmed = "confirmed"
     cancelled = "cancelled"
     completed = "completed"
 
-# String constraints
 BookingInfoStr = Annotated[Optional[str], StringConstraints(strip_whitespace=True, max_length=500)]
 
-# Base Schema
 class BookingBase(BaseModel):
     booking_date: date
     check_in_date: date
@@ -27,22 +26,24 @@ class BookingBase(BaseModel):
     status: BookingStatusEnum = BookingStatusEnum.pending
     additional_info: BookingInfoStr = None
 
-# Create Schema
 class BookingCreate(BookingBase):
-    user_id: int  # Required when creating
-    room_id: int  # Required when creating
+    room_id: int
 
-# Read Schema
 class BookingRead(BookingBase):
     id: int
 
     class Config:
         orm_mode = True
 
-# Read Schema with Relations
 class BookingWithRelations(BookingRead):
     user: Optional[UserRead] = None
     room: Optional[RoomRead] = None
     payment: Optional[PaymentRead] = None
     cancellation: Optional[CancellationRead] = None
-    reviews: list[ReviewRead] = []
+    reviews: list["ReviewRead"] = []
+
+    class Config:
+        orm_mode = True
+
+from app.schemas.review import ReviewRead
+BookingWithRelations.model_rebuild()
