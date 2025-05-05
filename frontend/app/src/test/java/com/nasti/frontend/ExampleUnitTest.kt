@@ -1,4 +1,4 @@
-package com.nasti.bookingapp
+package com.nasti.frontend
 
 import org.junit.Test
 

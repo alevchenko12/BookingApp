@@ -1,4 +1,4 @@
-package com.nasti.bookingapp.ui.theme
+package com.nasti.frontend.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

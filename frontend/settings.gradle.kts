@@ -19,5 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BookingApp"
+rootProject.name = "frontend"
 include(":app")
+ 
