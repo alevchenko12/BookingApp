@@ -9,6 +9,7 @@ from app.crud import user as crud_user
 from app.services.auth import create_access_token
 from app.dependencies.auth import get_current_user
 from app.models.user import User
+from app.schemas.token import LoginRequest  
 
 router = APIRouter(
     prefix="/users",
@@ -36,15 +37,29 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/login", response_model=TokenWithUser)
+"""@router.post("/login", response_model=TokenWithUser)
 def login_user(email: str, password: str, db: Session = Depends(get_db)):
-    """
+    
     Login with email and password. Returns access token and user info.
-    """
+    
     user = crud_user.authenticate_user(db, email, password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    token = create_access_token(data={"sub": user.email})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": user
+    }"""
+
+## ADDED usage of json body
+@router.post("/login", response_model=TokenWithUser)
+def login_user(data: LoginRequest, db: Session = Depends(get_db)):
+    user = crud_user.authenticate_user(db, data.email, data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
     token = create_access_token(data={"sub": user.email})
     return {
         "access_token": token,

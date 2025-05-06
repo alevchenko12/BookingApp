@@ -7,3 +7,9 @@ class Token(BaseModel):
 
 class TokenWithUser(Token):
     user: UserRead
+
+from pydantic import BaseModel
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
