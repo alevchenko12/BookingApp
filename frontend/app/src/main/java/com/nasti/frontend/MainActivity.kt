@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.nasti.frontend.ui.auth.LoginScreen
+import com.nasti.frontend.ui.auth.AuthLandingScreen
 import com.nasti.frontend.ui.auth.RegisterScreen
 import com.nasti.frontend.ui.theme.BookingAppTheme
 import com.nasti.frontend.utils.SessionManager
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BookingAppTheme {
                 val navController = rememberNavController()
-                AppNavHost(navController = navController, startDestination = if (isLoggedIn) "home" else "login")
+                AppNavHost(navController = navController, startDestination = if (isLoggedIn) "home" else "auth")
             }
         }
     }
@@ -37,18 +37,13 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
         navController = navController,
         startDestination = startDestination
     ) {
-        composable("login") {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                }
-            )
+        composable("auth") {
+            AuthLandingScreen(navController = navController)
         }
 
         composable("register") {
             RegisterScreen(
+                navController = navController, // ✅ Provide this
                 onRegisterSuccess = {
                     navController.navigate("home") {
                         popUpTo("register") { inclusive = true }

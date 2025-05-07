@@ -14,13 +14,22 @@ class RegisterViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _registerState = mutableStateOf<Result<TokenResponse>?>(null)
     val registerState: State<Result<TokenResponse>?> = _registerState
 
+    private val _errorMessage = mutableStateOf<String?>(null)
+    val errorMessage: State<String?> = _errorMessage
+
     fun register(request: RegisterRequest) {
         viewModelScope.launch {
             try {
                 val result = repository.register(request)
                 _registerState.value = Result.success(result)
+                _errorMessage.value = null
             } catch (e: Exception) {
-                _registerState.value = Result.failure(e)
+                _registerState.value = null
+                _errorMessage.value = when {
+                    e.message?.contains("already registered", true) == true ->
+                        "Email already in use"
+                    else -> "Registration failed. Please try again."
+                }
             }
         }
     }
