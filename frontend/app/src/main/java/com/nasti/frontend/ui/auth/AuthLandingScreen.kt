@@ -112,7 +112,7 @@ fun AuthLandingScreen(
             val token = loginResult.getOrNull()?.access_token ?: ""
             LaunchedEffect(token) {
                 sessionManager.saveToken(token)
-                navController.navigate("home") {
+                navController.navigate("profile") {
                     popUpTo("auth") { inclusive = true }
                 }
             }
