@@ -4,6 +4,7 @@ import com.nasti.frontend.data.api.ApiService
 import com.nasti.frontend.data.model.LoginRequest
 import com.nasti.frontend.data.model.RegisterRequest
 import com.nasti.frontend.data.model.TokenResponse
+import retrofit2.Response
 
 class AuthRepository(private val api: ApiService) {
 
@@ -25,4 +26,8 @@ class AuthRepository(private val api: ApiService) {
             throw Exception("Registration failed: ${response.errorBody()?.string() ?: "Unknown error"}")
         }
     }
+    suspend fun registerInitiate(request: RegisterRequest): Response<Unit> {
+        return api.registerInitiate(request)
+    }
+
 }

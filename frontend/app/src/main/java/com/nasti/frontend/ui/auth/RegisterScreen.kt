@@ -15,7 +15,6 @@ import androidx.navigation.NavController
 import com.nasti.frontend.data.api.RetrofitClient
 import com.nasti.frontend.data.model.RegisterRequest
 import com.nasti.frontend.data.repository.AuthRepository
-import com.nasti.frontend.utils.SessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +23,6 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    val sessionManager = remember { SessionManager(context) }
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -41,7 +39,7 @@ fun RegisterScreen(
     val viewModel = remember {
         RegisterViewModel(AuthRepository(RetrofitClient.api))
     }
-    val registerResult = viewModel.registerState.value
+    val verificationMessage = viewModel.verificationMessage.value
     val errorMessage = viewModel.errorMessage.value
 
     fun validate(): Boolean {
@@ -173,7 +171,7 @@ fun RegisterScreen(
                             phone = phone.ifBlank { null },
                             password = password
                         )
-                        viewModel.register(request)
+                        viewModel.registerInitiate(request)
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -181,21 +179,22 @@ fun RegisterScreen(
                 Text("Register")
             }
 
-            if (!errorMessage.isNullOrEmpty()) {
+            verificationMessage?.let {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = errorMessage,
-                    color = MaterialTheme.colorScheme.error,
+                    text = it,
+                    color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
 
-            if (registerResult?.isSuccess == true) {
-                val token = registerResult.getOrNull()?.access_token ?: ""
-                LaunchedEffect(token) {
-                    sessionManager.saveToken(token)
-                    onRegisterSuccess()
-                }
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }

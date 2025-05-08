@@ -12,6 +12,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.nasti.frontend.ui.auth.AuthLandingScreen
 import com.nasti.frontend.ui.auth.RegisterScreen
+import com.nasti.frontend.ui.auth.EmailVerificationHandler
+import com.nasti.frontend.ui.profile.UserProfileScreen
 import com.nasti.frontend.ui.theme.BookingAppTheme
 import com.nasti.frontend.utils.SessionManager
 
@@ -25,7 +27,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             BookingAppTheme {
                 val navController = rememberNavController()
-                AppNavHost(navController = navController, startDestination = if (isLoggedIn) "home" else "auth")
+
+                // Handle deep link for email verification
+                val deepLinkToken = intent?.data?.getQueryParameter("token")
+                if (deepLinkToken != null) {
+                    LaunchedEffect(deepLinkToken) {
+                        navController.navigate("verify/$deepLinkToken")
+                    }
+                }
+
+                AppNavHost(
+                    navController = navController,
+                    startDestination = if (isLoggedIn) "profile" else "auth"
+                )
             }
         }
     }
@@ -43,26 +57,30 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
 
         composable("register") {
             RegisterScreen(
-                navController = navController, // ✅ Provide this
+                navController = navController,
                 onRegisterSuccess = {
-                    navController.navigate("home") {
+                    navController.navigate("profile") {
                         popUpTo("register") { inclusive = true }
                     }
                 }
             )
         }
 
+        composable("profile") {
+            UserProfileScreen(navController = navController)
+        }
+
+        composable("verify/{token}") { backStackEntry ->
+            val token = backStackEntry.arguments?.getString("token") ?: ""
+            EmailVerificationHandler(token = token, navController = navController)
+        }
+
         composable("home") {
-            HomeScreen()
+            Text(
+                text = "Welcome to Booking App!",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(32.dp)
+            )
         }
     }
-}
-
-@Composable
-fun HomeScreen() {
-    Text(
-        text = "Welcome to Booking App!",
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.padding(32.dp)
-    )
 }

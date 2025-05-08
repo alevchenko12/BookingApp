@@ -10,6 +10,10 @@ from app.services.auth import create_access_token
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.schemas.token import LoginRequest  
+from app.services.email_service import send_registration_email
+from app.services.email_service import send_verification_email
+from jose import jwt, JWTError
+from app.config.settings import settings
 
 router = APIRouter(
     prefix="/users",
@@ -29,29 +33,18 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=409, detail="Email already registered")
 
+    # Send welcome email
+    try:
+        send_registration_email(user.email, user.first_name)
+    except Exception as e:
+        print(f"[Email Error] Failed to send welcome email: {e}")
+
     token = create_access_token(data={"sub": user.email})
     return {
         "access_token": token,
         "token_type": "bearer",
         "user": user
     }
-
-
-"""@router.post("/login", response_model=TokenWithUser)
-def login_user(email: str, password: str, db: Session = Depends(get_db)):
-    
-    Login with email and password. Returns access token and user info.
-    
-    user = crud_user.authenticate_user(db, email, password)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    token = create_access_token(data={"sub": user.email})
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user": user
-    }"""
 
 ## ADDED usage of json body
 @router.post("/login", response_model=TokenWithUser)
@@ -66,6 +59,32 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": user
     }
+
+@router.post("/register-initiate", status_code=200)
+def register_initiate(user_in: UserCreate):
+    token = jwt.encode(user_in.model_dump(), settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    send_verification_email(user_in.email, token)
+    return {"message": "Verification email sent. Please check your inbox."}
+
+
+@router.get("/verify-registration")
+def verify_registration(token: str, db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        user_data = UserCreate(**payload)
+
+        existing = crud_user.get_user_by_email(db, user_data.email)
+        if existing:
+            raise HTTPException(status_code=409, detail="Email already registered")
+
+        user = crud_user.create_user(db, user_data)
+        if not user:
+            raise HTTPException(status_code=500, detail="User creation failed")
+
+        access_token = create_access_token(data={"sub": user.email})
+        return {"access_token": access_token, "user": user}
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
 
 # -----------------------
 # PROTECTED: User Self-Service

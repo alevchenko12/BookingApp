@@ -36,4 +36,15 @@ interface ApiService {
     // ❌ Delete account
     @DELETE("users/me")
     suspend fun deleteAccount(): Response<Unit>
+
+    @GET("users/verify-registration")
+    suspend fun verifyEmail(
+        @Query("token") token: String
+    ): retrofit2.Response<Unit>
+
+    @POST("users/register-initiate")
+    suspend fun registerInitiate(
+        @Body request: RegisterRequest
+    ): Response<Unit>
+
 }

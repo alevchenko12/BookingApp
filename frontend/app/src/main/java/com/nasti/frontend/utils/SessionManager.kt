@@ -2,6 +2,8 @@ package com.nasti.frontend.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Base64
+import org.json.JSONObject
 
 class SessionManager(context: Context) {
 
@@ -25,7 +27,33 @@ class SessionManager(context: Context) {
         prefs.edit().clear().apply()
     }
 
+    /*fun isLoggedIn(): Boolean {
+        val token = getToken() ?: return false
+        return !isTokenExpired(token)
+    }*/
+
     fun isLoggedIn(): Boolean {
-        return getToken() != null
+        // ⚠️ FOR TESTING ONLY: Force logout behavior
+        return false
+
+        // return getToken() != null  ← restore this after testing
+    }
+
+
+    private fun isTokenExpired(token: String): Boolean {
+        return try {
+            val parts = token.split(".")
+            if (parts.size != 3) return true
+
+            val payload = String(Base64.decode(parts[1], Base64.URL_SAFE))
+            val json = JSONObject(payload)
+
+            val exp = json.optLong("exp", 0L)
+            val currentTimeSec = System.currentTimeMillis() / 1000
+
+            exp < currentTimeSec
+        } catch (e: Exception) {
+            true // If parsing fails, treat token as expired
+        }
     }
 }
