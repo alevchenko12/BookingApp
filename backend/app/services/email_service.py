@@ -4,23 +4,29 @@ import smtplib
 from app.config.settings import settings
 
 def send_registration_email(to_email: str, user_name: str):
-    subject = "Welcome to Booking App"
+    subject = "Welcome to Booking App!"
     body = f"""
-    Hi {user_name},
-
-    Thank you for registering with Booking App!
-
-    We're excited to have you on board. If you have any questions, feel free to reach out.
-
-    Happy booking!
-    — The Booking App Team
+    <html>
+        <body>
+            <p>Hi <strong>{user_name}</strong>,</p>
+            <p>🎉 Your account has been successfully created and verified.</p>
+            <p>
+                Start exploring hotels, apartments, and experiences right away in the Booking App.
+            </p>
+            <p>
+                If you ever need help, reply to this email — we're here for you!
+            </p>
+            <br>
+            <p>Warm wishes,<br/>The Booking App Team</p>
+        </body>
+    </html>
     """
 
     msg = MIMEMultipart()
     msg["From"] = f"{settings.EMAIL_FROM_NAME} <{settings.SMTP_USER}>"
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+    msg.attach(MIMEText(body, "html"))
 
     try:
         with smtplib.SMTP(settings.SMTP_SERVER, settings.SMTP_PORT) as server:
@@ -30,28 +36,34 @@ def send_registration_email(to_email: str, user_name: str):
     except Exception as e:
         print(f"[Email Error] Failed to send welcome email to {to_email}: {e}")
 
+
 def send_verification_email(to_email: str, token: str):
-    link = f"bookingapp://verify?token={token}"
+    link = f"bookingapp://verify?token={token}"  # Use your deep link
     subject = "Verify your Booking App account"
     body = f"""
-    Hi,
-
-    Please verify your email address to complete your Booking App registration.
-
-    Click the link below to verify:
-    {link}
-
-    If you did not initiate this request, please ignore this email.
-
-    Thanks,
-    The Booking App Team
+    <html>
+        <body>
+            <p>Hi there,</p>
+            <p>Please verify your email address to complete your Booking App registration.</p>
+            <p>
+                <a href="{link}" style="font-weight: bold; color: #2b7bb9;">Click here to verify your account</a>
+            </p>
+            <p>If the button doesn't work, copy and paste this link into your app:</p>
+            <p><code>{link}</code></p>
+            <br>
+            </p>
+             <p>If you didn’t create this account, you can safely ignore this email.</p>
+            <br>
+            <p>Thanks,<br/>The Booking App Team</p>
+        </body>
+    </html>
     """
 
     msg = MIMEMultipart()
     msg["From"] = f"{settings.EMAIL_FROM_NAME} <{settings.SMTP_USER}>"
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+    msg.attach(MIMEText(body, "html"))
 
     try:
         with smtplib.SMTP(settings.SMTP_SERVER, settings.SMTP_PORT) as server:

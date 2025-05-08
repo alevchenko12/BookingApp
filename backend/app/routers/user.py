@@ -14,6 +14,7 @@ from app.services.email_service import send_registration_email
 from app.services.email_service import send_verification_email
 from jose import jwt, JWTError
 from app.config.settings import settings
+from app.services.email_service import send_registration_email
 
 router = APIRouter(
     prefix="/users",
@@ -23,22 +24,30 @@ router = APIRouter(
 # -----------------------
 # PUBLIC: Register & Login
 # -----------------------
-
+  
 @router.post("/register", response_model=TokenWithUser, status_code=status.HTTP_201_CREATED)
 def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new user. Returns access token and user info.
+    Only used for direct registration without verification (if allowed).
     """
+    # Check if user already exists
+    existing = crud_user.get_user_by_email(db, user_in.email)
+    if existing:
+        raise HTTPException(status_code=409, detail="Email already registered")
+
+    # Create the user in the DB
     user = crud_user.create_user(db, user_in)
     if not user:
-        raise HTTPException(status_code=409, detail="Email already registered")
+        raise HTTPException(status_code=500, detail="Failed to create user")
 
     # Send welcome email
     try:
-        send_registration_email(user.email, user.first_name)
+        send_registration_email(user.email, f"{user.first_name} {user.last_name}")
     except Exception as e:
         print(f"[Email Error] Failed to send welcome email: {e}")
 
+    # Return access token and user data
     token = create_access_token(data={"sub": user.email})
     return {
         "access_token": token,
@@ -80,6 +89,12 @@ def verify_registration(token: str, db: Session = Depends(get_db)):
         user = crud_user.create_user(db, user_data)
         if not user:
             raise HTTPException(status_code=500, detail="User creation failed")
+
+        # Send greeting email here
+        try:
+            send_registration_email(user.email, f"{user.first_name} {user.last_name}")
+        except Exception as e:
+            print(f"[Email Error] Failed to send welcome email: {e}")
 
         access_token = create_access_token(data={"sub": user.email})
         return {"access_token": access_token, "user": user}
