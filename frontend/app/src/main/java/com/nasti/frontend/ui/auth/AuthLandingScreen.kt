@@ -121,6 +121,17 @@ fun AuthLandingScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
+            text = "Forgot password?",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .clickable { navController.navigate("forgot") }
+                .padding(top = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
             text = "Don't have an account? Register",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary,

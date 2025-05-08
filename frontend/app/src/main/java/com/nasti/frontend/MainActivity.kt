@@ -12,7 +12,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.nasti.frontend.ui.auth.AuthLandingScreen
 import com.nasti.frontend.ui.auth.RegisterScreen
+import com.nasti.frontend.ui.auth.ForgotPasswordScreen
 import com.nasti.frontend.ui.auth.EmailVerificationHandler
+import com.nasti.frontend.ui.auth.VerifyCodeScreen
+import com.nasti.frontend.ui.auth.ResetPasswordScreen
 import com.nasti.frontend.ui.profile.UserProfileScreen
 import com.nasti.frontend.ui.theme.BookingAppTheme
 import com.nasti.frontend.utils.SessionManager
@@ -55,6 +58,10 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
             AuthLandingScreen(navController = navController)
         }
 
+        composable("forgot") {
+            ForgotPasswordScreen(navController = navController)
+        }
+
         composable("register") {
             RegisterScreen(
                 navController = navController,
@@ -74,6 +81,17 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
             val token = backStackEntry.arguments?.getString("token") ?: ""
             EmailVerificationHandler(token = token, navController = navController)
         }
+
+        composable("verifyCode/{email}") { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            VerifyCodeScreen(navController = navController, email = email)
+        }
+
+        composable("resetPassword/{email}") { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            ResetPasswordScreen(navController = navController, email = email)
+        }
+
 
         composable("home") {
             Text(

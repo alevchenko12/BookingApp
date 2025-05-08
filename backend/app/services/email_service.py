@@ -72,3 +72,28 @@ def send_verification_email(to_email: str, token: str):
             server.send_message(msg)
     except Exception as e:
         print(f"[Email Error] Failed to send verification email to {to_email}: {e}")
+
+def send_reset_code_email(to_email: str, code: str):
+    subject = "Your Booking App Password Reset Code"
+    body = f"""
+    <html>
+        <body>
+            <p>Hi,</p>
+            <p>We received a request to reset your password.</p>
+            <p><strong>Your reset code is: {code}</strong></p>
+            <p>If you didn't request this, you can ignore this message.</p>
+            <br/>
+            <p>— The Booking App Team</p>
+        </body>
+    </html>
+    """
+    msg = MIMEMultipart()
+    msg["From"] = f"{settings.EMAIL_FROM_NAME} <{settings.SMTP_USER}>"
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "html"))
+
+    with smtplib.SMTP(settings.SMTP_SERVER, settings.SMTP_PORT) as server:
+        server.starttls()
+        server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+        server.send_message(msg)

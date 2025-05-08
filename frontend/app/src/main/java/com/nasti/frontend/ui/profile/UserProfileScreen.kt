@@ -212,6 +212,17 @@ fun UserProfileScreen(navController: NavController) {
                 ) {
                     Text("Logout")
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        navController.navigate("forgot")
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Change Password")
+                }
             }
         }
     }

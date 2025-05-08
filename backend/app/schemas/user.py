@@ -61,6 +61,21 @@ class UserUpdate(BaseModel):
     last_name: Optional[NameStr] = None
     phone: Optional[PhoneStr] = None
 
+# ---------------------
+# Forgot Password Flow Schemas
+# ---------------------
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class VerifyCodeRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    new_password: str
+
 
 # ---------------------
 # Resolve forward references

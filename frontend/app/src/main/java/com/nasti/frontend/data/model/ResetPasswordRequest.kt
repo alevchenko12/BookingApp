@@ -1,4 +1,6 @@
 package com.nasti.frontend.data.model
 
-class ResetPasswordRequest {
-}
+data class ResetPasswordRequest(
+    val email: String,
+    val new_password: String
+)

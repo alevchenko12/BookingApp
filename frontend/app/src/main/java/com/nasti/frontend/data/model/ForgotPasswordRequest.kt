@@ -1,4 +1,5 @@
 package com.nasti.frontend.data.model
 
-class ForgotPasswordRequest {
-}
+data class ForgotPasswordRequest(
+    val email: String
+)
