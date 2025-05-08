@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from app.config.database import get_db
+from app.schemas.user import ForgotPasswordRequest, VerifyCodeRequest, ResetPasswordRequest
 from app.schemas.user import UserCreate, UserRead, UserUpdate, UserWithRelations
 from app.schemas.token import TokenWithUser
 from app.crud import user as crud_user
@@ -10,11 +11,12 @@ from app.services.auth import create_access_token
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.schemas.token import LoginRequest  
-from app.services.email_service import send_registration_email
-from app.services.email_service import send_verification_email
+from app.services.email_service import send_registration_email, send_verification_email, send_reset_code_email
 from jose import jwt, JWTError
 from app.config.settings import settings
-from app.services.email_service import send_registration_email
+from pydantic import EmailStr
+import random
+
 
 router = APIRouter(
     prefix="/users",
@@ -68,6 +70,46 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": user
     }
+
+reset_codes = {}  # Use Redis/DB in production
+
+# Send reset code
+@router.post("/forgot-password")
+def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = crud_user.get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    code = str(random.randint(100000, 999999))
+    reset_codes[request.email] = code
+
+    try:
+        send_reset_code_email(request.email, code)
+    except Exception as e:
+        print(f"[Email Error] Failed to send reset code: {e}")
+        raise HTTPException(status_code=500, detail="Failed to send email")
+
+    return {"message": "Reset code sent to your email"}
+
+# Verify code
+@router.post("/verify-code")
+def verify_code(request: VerifyCodeRequest):
+    expected = reset_codes.get(request.email)
+    if not expected or request.code != expected:
+        raise HTTPException(status_code=400, detail="Invalid or expired code")
+
+    return {"message": "Code verified"}
+
+# Reset password
+@router.post("/reset-password")
+def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db)):
+    user = crud_user.get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    crud_user.update_user_password(db, user, request.new_password)
+    reset_codes.pop(request.email, None)
+    return {"message": "Password reset successful"}
 
 @router.post("/register-initiate", status_code=200)
 def register_initiate(user_in: UserCreate):
