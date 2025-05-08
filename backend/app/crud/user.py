@@ -88,3 +88,10 @@ def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     if user and verify_password(password, user.password_hash):
         return user
     return None
+
+def update_user_password(db: Session, user: User, new_password: str) -> User:
+    """Securely update a user's password."""
+    user.password_hash = pwd_context.hash(new_password)
+    db.commit()
+    db.refresh(user)
+    return user
