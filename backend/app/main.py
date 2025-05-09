@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from app.config.settings import settings
 
 # Routers
-from app.routers import city, country, user, user_role, hotel, room, room_availability, hotel_photo, booking, cancellation, payment, review
+from app.routers import city, country, user, user_role, hotel, room, room_availability, hotel_photo, booking, cancellation, payment, review, location
 app = FastAPI(
     title="Booking API",
     version="1.0.0"
@@ -23,3 +23,4 @@ app.include_router(booking.router)
 app.include_router(cancellation.router)
 app.include_router(payment.router)
 app.include_router(review.router)
+app.include_router(location.router)

@@ -64,4 +64,21 @@ interface ApiService {
     @POST("users/reset-password")
     suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<Unit>
 
+    @GET("cities/search/")
+    suspend fun searchCities(
+        @Query("q") query: String,
+        @Query("country_id") countryId: Int? = null,
+        @Query("limit") limit: Int = 10
+    ): Response<List<CitySuggestion>>
+
+    @GET("countries/search/")
+    suspend fun searchCountries(
+        @Query("q") query: String
+    ): Response<List<CountryResponse>>
+
+    // com.nasti.frontend.data.api.ApiService.kt
+
+    @GET("locations/search")
+    suspend fun searchLocations(@Query("q") query: String): Response<List<Map<String, Any>>>
+
 }

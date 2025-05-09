@@ -73,3 +73,22 @@ def get_city_with_country(city_id: int, db: Session = Depends(get_db)):
             "name": city.country.name
         } if city.country else None
     }
+
+from app.schemas.city import LocationSearchResult
+
+@router.get("/location-autocomplete", response_model=List[LocationSearchResult])
+def location_autocomplete(
+    q: str = Query(..., min_length=1),
+    limit: int = 10,
+    db: Session = Depends(get_db),
+):
+    cities = crud_city.search_city_with_country(db, query=q, limit=limit)
+    return [
+        LocationSearchResult(
+            city_id=city.id,
+            city_name=city.name,
+            country_id=city.country.id,
+            country_name=city.country.name,
+        )
+        for city in cities if city.country
+    ]

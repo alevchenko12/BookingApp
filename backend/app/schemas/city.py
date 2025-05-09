@@ -16,3 +16,9 @@ class CityRead(BaseModel):
 
     class Config:
         orm_mode = True
+
+class LocationSearchResult(BaseModel):
+    city_id: int
+    city_name: str
+    country_id: int
+    country_name: str

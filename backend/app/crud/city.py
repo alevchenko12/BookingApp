@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from app.models.city import City
 from app.schemas.city import CityCreate
+from sqlalchemy.orm import Session, joinedload
 
 
 def create_city(db: Session, city_in: CityCreate) -> Optional[City]:
@@ -77,3 +78,14 @@ def search_cities_by_prefix(db: Session, query: str, country_id: Optional[int] =
         q = q.filter(City.country_id == country_id)
 
     return q.order_by(City.name.asc()).limit(limit).all()
+
+def search_city_with_country(db: Session, query: str, limit: int = 10) -> List[City]:
+    return (
+        db.query(City)
+        .join(City.country)
+        .filter(City.name.ilike(f"%{query}%"))
+        .options(joinedload(City.country))
+        .order_by(City.name)
+        .limit(limit)
+        .all()
+    )
