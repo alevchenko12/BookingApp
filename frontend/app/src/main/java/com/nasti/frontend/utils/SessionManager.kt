@@ -27,18 +27,17 @@ class SessionManager(context: Context) {
         prefs.edit().clear().apply()
     }
 
-    /*fun isLoggedIn(): Boolean {
+    fun isLoggedIn(): Boolean {
         val token = getToken() ?: return false
         return !isTokenExpired(token)
-    }*/
+    }
 
-    fun isLoggedIn(): Boolean {
+    /*fun isLoggedIn(): Boolean {
         // ⚠️ FOR TESTING ONLY: Force logout behavior
         return false
 
         // return getToken() != null  ← restore this after testing
-    }
-
+    }*/
 
     private fun isTokenExpired(token: String): Boolean {
         return try {

@@ -18,6 +18,7 @@ import com.nasti.frontend.data.api.RetrofitClient
 import com.nasti.frontend.data.model.User
 import com.nasti.frontend.data.model.UserUpdateRequest
 import com.nasti.frontend.data.repository.UserRepository
+import com.nasti.frontend.ui.components.BottomNavigationBar
 import com.nasti.frontend.utils.SessionManager
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
@@ -92,6 +93,9 @@ fun UserProfileScreen(navController: NavController) {
                     }
                 }
             )
+        },
+        bottomBar = {
+            BottomNavigationBar(navController = navController, selected = "profile")
         }
     ) { padding ->
         Column(
