@@ -28,7 +28,7 @@ interface ApiService {
         @Body request: UserUpdateRequest
     ): Response<User>
 
-    // Change password (assuming you’ll add this endpoint later)
+    // Change password
     @PUT("users/me/password")
     suspend fun changePassword(
         @Body request: PasswordChangeRequest
@@ -44,7 +44,7 @@ interface ApiService {
         @Query("token") token: String
     ): retrofit2.Response<Unit>
 
-    // Register 2
+    // Register initiating
     @POST("users/register-initiate")
     suspend fun registerInitiate(
         @Body request: RegisterRequest
@@ -56,28 +56,17 @@ interface ApiService {
         @Body request: ForgotPasswordRequest
     ): Response<Unit>
 
+    // Verify email code
     @POST("users/verify-code")
     suspend fun verifyCode(
         @Body request: Map<String, String>
     ): Response<Unit>
 
+    // Reset password
     @POST("users/reset-password")
     suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<Unit>
 
-    @GET("cities/search/")
-    suspend fun searchCities(
-        @Query("q") query: String,
-        @Query("country_id") countryId: Int? = null,
-        @Query("limit") limit: Int = 10
-    ): Response<List<CitySuggestion>>
-
-    @GET("countries/search/")
-    suspend fun searchCountries(
-        @Query("q") query: String
-    ): Response<List<CountryResponse>>
-
-    // com.nasti.frontend.data.api.ApiService.kt
-
+    // Search location
     @GET("locations/search")
     suspend fun searchLocations(@Query("q") query: String): Response<List<Map<String, Any>>>
 

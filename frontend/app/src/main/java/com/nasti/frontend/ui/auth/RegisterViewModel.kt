@@ -43,7 +43,7 @@ class RegisterViewModel(private val repository: AuthRepository) : ViewModel() {
             try {
                 val response: Response<Unit> = repository.registerInitiate(request)
                 if (response.isSuccessful) {
-                    _verificationMessage.value = "✅ Verification email sent. Please check your inbox."
+                    _verificationMessage.value = "Verification email sent. Please check your inbox."
                     _errorMessage.value = null
                 } else {
                     _verificationMessage.value = null
