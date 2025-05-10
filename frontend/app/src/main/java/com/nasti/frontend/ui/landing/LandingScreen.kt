@@ -1,6 +1,6 @@
 package com.nasti.frontend.ui.landing
 
-import android.app.DatePickerDialog
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -28,74 +28,29 @@ fun LandingScreen(
 ) {
     val destination by viewModel.destination.collectAsState()
     val suggestions by viewModel.suggestions.collectAsState()
-
     var guests by remember { mutableStateOf("1 room, 2 adults") }
 
     val context = LocalContext.current
-    val formatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+    val formatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
 
-    var startDate by remember { mutableStateOf<Calendar?>(null) }
-    var endDate by remember { mutableStateOf<Calendar?>(null) }
-    var showStartPicker by remember { mutableStateOf(false) }
-    var showEndPicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDateRangePickerState()
+    var showDatePicker by remember { mutableStateOf(false) }
 
-    val today = remember {
-        Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-    }
+    val startMillis = datePickerState.selectedStartDateMillis
+    val endMillis = datePickerState.selectedEndDateMillis
 
     val dateRangeText = when {
-        startDate != null && endDate != null -> "${formatter.format(startDate!!.time)} - ${formatter.format(endDate!!.time)}"
-        startDate != null -> "${formatter.format(startDate!!.time)} - Select checkout"
+        startMillis != null && endMillis != null -> "${formatter.format(Date(startMillis))} - ${formatter.format(Date(endMillis))}"
+        startMillis != null -> "${formatter.format(Date(startMillis))} - Select checkout"
         else -> "Select dates"
     }
 
-    // 🗓 Start date picker
-    LaunchedEffect(showStartPicker) {
-        if (showStartPicker) {
-            DatePickerDialog(
-                context,
-                { _, year, month, day ->
-                    startDate = Calendar.getInstance().apply {
-                        set(year, month, day, 0, 0)
-                    }
-                    endDate = null // reset checkout
-                    showStartPicker = false
-                    showEndPicker = true
-                },
-                today.get(Calendar.YEAR),
-                today.get(Calendar.MONTH),
-                today.get(Calendar.DAY_OF_MONTH)
-            ).apply {
-                datePicker.minDate = today.timeInMillis
-            }.show()
-        }
-    }
-
-    // 🗓 End date picker
-    LaunchedEffect(showEndPicker) {
-        if (showEndPicker && startDate != null) {
-            val minCheckout = (startDate!!.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, 1) }
-            DatePickerDialog(
-                context,
-                { _, year, month, day ->
-                    endDate = Calendar.getInstance().apply {
-                        set(year, month, day, 0, 0)
-                    }
-                    showEndPicker = false
-                },
-                minCheckout.get(Calendar.YEAR),
-                minCheckout.get(Calendar.MONTH),
-                minCheckout.get(Calendar.DAY_OF_MONTH)
-            ).apply {
-                datePicker.minDate = minCheckout.timeInMillis
-            }.show()
-        }
-    }
+    val today = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Booking App") }) },
@@ -143,7 +98,7 @@ fun LandingScreen(
                 }
             }
 
-            // Date Range Field
+            // 📅 Date Range Picker Trigger
             OutlinedTextField(
                 value = dateRangeText,
                 onValueChange = {},
@@ -151,8 +106,41 @@ fun LandingScreen(
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showStartPicker = true }
+                    .clickable { showDatePicker = true }
             )
+
+            if (showDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            when {
+                                startMillis == null || endMillis == null -> {
+                                    Toast.makeText(context, "Please select both check-in and check-out dates.", Toast.LENGTH_SHORT).show()
+                                }
+                                startMillis < today -> {
+                                    Toast.makeText(context, "Check-in date must not be in the past.", Toast.LENGTH_SHORT).show()
+                                }
+                                endMillis <= startMillis -> {
+                                    Toast.makeText(context, "Stay must be at least one night.", Toast.LENGTH_SHORT).show()
+                                }
+                                else -> {
+                                    showDatePicker = false
+                                }
+                            }
+                        }) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                ) {
+                    DateRangePicker(state = datePickerState)
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -168,9 +156,13 @@ fun LandingScreen(
 
             Button(
                 onClick = {
-                    // Trigger search using destination, date range, guests
+                    Toast.makeText(context, "Searching...", Toast.LENGTH_SHORT).show()
                 },
-                enabled = destination.isNotBlank() && startDate != null && endDate != null,
+                enabled = destination.isNotBlank() &&
+                        startMillis != null &&
+                        endMillis != null &&
+                        endMillis > startMillis &&
+                        startMillis >= today,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.Default.Search, contentDescription = null)
