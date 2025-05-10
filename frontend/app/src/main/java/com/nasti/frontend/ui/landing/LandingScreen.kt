@@ -28,7 +28,6 @@ fun LandingScreen(
 ) {
     val destination by viewModel.destination.collectAsState()
     val suggestions by viewModel.suggestions.collectAsState()
-    var guests by remember { mutableStateOf("1 room, 2 adults") }
 
     val context = LocalContext.current
     val formatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
@@ -51,6 +50,13 @@ fun LandingScreen(
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
     }.timeInMillis
+
+    // Guests & Rooms logic
+    var showGuestDialog by remember { mutableStateOf(false) }
+    var rooms by remember { mutableStateOf(1) }
+    var adults by remember { mutableStateOf(1) }
+
+    val guests = "$rooms room${if (rooms > 1) "s" else ""}, $adults adult${if (adults > 1) "s" else ""}"
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Booking App") }) },
@@ -98,7 +104,6 @@ fun LandingScreen(
                 }
             }
 
-            // 📅 Date Range Picker Trigger
             OutlinedTextField(
                 value = dateRangeText,
                 onValueChange = {},
@@ -149,8 +154,63 @@ fun LandingScreen(
                 onValueChange = {},
                 label = { Text("Rooms & Guests") },
                 readOnly = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showGuestDialog = true }
             )
+
+            if (showGuestDialog) {
+                AlertDialog(
+                    onDismissRequest = { showGuestDialog = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            if (adults > rooms * 4) {
+                                Toast.makeText(
+                                    context,
+                                    "You have $adults adults in $rooms room${if (rooms > 1) "s" else ""}. Make sure the property supports shared rooms.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            showGuestDialog = false
+                        }) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showGuestDialog = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                    title = { Text("Select Rooms & Guests") },
+                    text = {
+                        Column {
+                            Text("Rooms")
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                IconButton(onClick = { if (rooms > 1) rooms-- }) { Text("-") }
+                                Text("$rooms", style = MaterialTheme.typography.titleLarge)
+                                IconButton(onClick = { rooms++ }) { Text("+") }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text("Adults")
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                IconButton(onClick = { if (adults > 1) adults-- }) { Text("-") }
+                                Text("$adults", style = MaterialTheme.typography.titleLarge)
+                                IconButton(onClick = { adults++ }) { Text("+") }
+                            }
+                        }
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
