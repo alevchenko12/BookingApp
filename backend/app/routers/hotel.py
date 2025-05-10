@@ -9,6 +9,8 @@ from app.crud.hotel import (
     create_hotel, get_hotel_by_id, get_all_hotels,
     delete_hotel, update_hotel, search_hotels, get_hotels_by_owner
 )
+from app.schemas.search import HotelSearchRequest, HotelSearchResult
+from app.services.search import perform_hotel_search
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
@@ -131,3 +133,11 @@ def get_my_hotels(
     Get hotels owned by the currently authenticated user.
     """
     return get_hotels_by_owner(db, current_user.id)
+
+# NEW: Advanced Hotel Search with Availability & Destination logic
+@router.post("/search-available", response_model=List[HotelSearchResult])
+def search_available_hotels(
+    request: HotelSearchRequest,
+    db: Session = Depends(get_db)
+):
+    return perform_hotel_search(db, request)

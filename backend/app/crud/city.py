@@ -89,3 +89,12 @@ def search_city_with_country(db: Session, query: str, limit: int = 10) -> List[C
         .limit(limit)
         .all()
     )
+
+def get_city_by_name_and_country(db: Session, city_name: str, country_id: int) -> Optional[City]:
+    """
+    Find a city by name (case-insensitive) and country ID.
+    """
+    return db.query(City).filter(
+        City.name.ilike(city_name.strip()),
+        City.country_id == country_id
+    ).first()

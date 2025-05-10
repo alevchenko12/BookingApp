@@ -80,3 +80,9 @@ def search_countries_by_prefix(db: Session, query: str, limit: int = 10) -> List
         .limit(limit)
         .all()
     )
+
+def get_country_by_name(db: Session, name: str) -> Optional[Country]:
+    """
+    Retrieve a country by exact name (case-insensitive).
+    """
+    return db.query(Country).filter(Country.name.ilike(name.strip())).first()

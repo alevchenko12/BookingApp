@@ -70,4 +70,8 @@ interface ApiService {
     @GET("locations/search")
     suspend fun searchLocations(@Query("q") query: String): Response<List<Map<String, Any>>>
 
+    @POST("hotels/search-available")
+    suspend fun searchAvailableHotels(
+        @Body request: HotelSearchRequest
+    ): Response<List<HotelSearchResult>>
 }

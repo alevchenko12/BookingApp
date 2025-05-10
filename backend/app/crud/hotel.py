@@ -110,6 +110,12 @@ def delete_hotel(db: Session, hotel_id: int) -> bool:
         db.rollback()
         return False
 
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
+from typing import Optional, List
+from app.models.hotel import Hotel
+from app.models.city import City
+
 def search_hotels(
     db: Session,
     country_id: Optional[int] = None,
@@ -119,25 +125,19 @@ def search_hotels(
     center_lon: Optional[float] = None,
     radius_km: Optional[float] = None
 ) -> List[Hotel]:
-    """
-    Search hotels using city/country, star rating, and optional geo-radius.
-    """
+    query = db.query(Hotel).join(Hotel.city).options(
+        joinedload(Hotel.city).joinedload(City.country)
+    )
 
-    query = db.query(Hotel).join(Hotel.city)
-
-    # Filter by country (via city.country_id)
     if country_id is not None:
         query = query.filter(City.country_id == country_id)
 
-    # Filter by city
     if city_id is not None:
         query = query.filter(Hotel.city_id == city_id)
 
-    # Filter by star rating
     if min_stars is not None:
         query = query.filter(Hotel.stars >= min_stars)
 
-    # Filter by radius using Haversine formula
     if center_lat is not None and center_lon is not None and radius_km is not None:
         EARTH_RADIUS_KM = 6371
 

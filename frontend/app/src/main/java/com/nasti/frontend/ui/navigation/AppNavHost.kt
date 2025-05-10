@@ -11,7 +11,10 @@ import androidx.navigation.compose.*
 import com.nasti.frontend.ui.auth.*
 import com.nasti.frontend.ui.landing.LandingScreen
 import com.nasti.frontend.ui.profile.UserProfileScreen
+import com.nasti.frontend.ui.search.SearchResultsScreen
 import com.nasti.frontend.utils.SessionManager
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.nasti.frontend.ui.search.SearchViewModel
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -19,9 +22,13 @@ fun AppNavHost(navController: NavHostController) {
     val sessionManager = SessionManager(context)
     val isLoggedIn = sessionManager.isLoggedIn()
 
+    // ✅ Create a single shared SearchViewModel instance
+    val searchViewModel: SearchViewModel = viewModel()
+
     NavHost(navController = navController, startDestination = "landing") {
+
         composable("landing") {
-            LandingScreen(navController)
+            LandingScreen(navController = navController, searchViewModel = searchViewModel)
         }
 
         composable("auth") {
@@ -68,6 +75,11 @@ fun AppNavHost(navController: NavHostController) {
                     }
                 }
             }
+        }
+
+        composable("searchResults") {
+            // ✅ Use the shared SearchViewModel
+            SearchResultsScreen(navController = navController, viewModel = searchViewModel)
         }
 
         composable("home") {

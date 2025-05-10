@@ -15,8 +15,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.nasti.frontend.data.api.RetrofitClient
+import com.nasti.frontend.data.model.HotelSearchRequest
 import com.nasti.frontend.data.model.LocationSuggestion
 import com.nasti.frontend.ui.components.BottomNavigationBar
+import com.nasti.frontend.ui.search.SearchViewModel
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,13 +28,15 @@ import java.util.*
 @Composable
 fun LandingScreen(
     navController: NavController,
-    viewModel: LandingViewModel = viewModel()
+    viewModel: LandingViewModel = viewModel(),
+    searchViewModel: SearchViewModel = viewModel()
 ) {
     val destination by viewModel.destination.collectAsState()
     val suggestions by viewModel.suggestions.collectAsState()
 
     val context = LocalContext.current
-    val formatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
+    val formatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    val dateLabelFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
 
     val datePickerState = rememberDateRangePickerState()
     var showDatePicker by remember { mutableStateOf(false) }
@@ -39,8 +45,8 @@ fun LandingScreen(
     val endMillis = datePickerState.selectedEndDateMillis
 
     val dateRangeText = when {
-        startMillis != null && endMillis != null -> "${formatter.format(Date(startMillis))} - ${formatter.format(Date(endMillis))}"
-        startMillis != null -> "${formatter.format(Date(startMillis))} - Select checkout"
+        startMillis != null && endMillis != null -> "${dateLabelFormatter.format(Date(startMillis))} - ${dateLabelFormatter.format(Date(endMillis))}"
+        startMillis != null -> "${dateLabelFormatter.format(Date(startMillis))} - Select checkout"
         else -> "Select dates"
     }
 
@@ -51,12 +57,13 @@ fun LandingScreen(
         set(Calendar.MILLISECOND, 0)
     }.timeInMillis
 
-    // Guests & Rooms logic
     var showGuestDialog by remember { mutableStateOf(false) }
     var rooms by remember { mutableStateOf(1) }
     var adults by remember { mutableStateOf(1) }
 
     val guests = "$rooms room${if (rooms > 1) "s" else ""}, $adults adult${if (adults > 1) "s" else ""}"
+
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Booking App") }) },
@@ -119,28 +126,15 @@ fun LandingScreen(
                     onDismissRequest = { showDatePicker = false },
                     confirmButton = {
                         TextButton(onClick = {
-                            when {
-                                startMillis == null || endMillis == null -> {
-                                    Toast.makeText(context, "Please select both check-in and check-out dates.", Toast.LENGTH_SHORT).show()
-                                }
-                                startMillis < today -> {
-                                    Toast.makeText(context, "Check-in date must not be in the past.", Toast.LENGTH_SHORT).show()
-                                }
-                                endMillis <= startMillis -> {
-                                    Toast.makeText(context, "Stay must be at least one night.", Toast.LENGTH_SHORT).show()
-                                }
-                                else -> {
-                                    showDatePicker = false
-                                }
+                            if (startMillis == null || endMillis == null) {
+                                Toast.makeText(context, "Please select valid dates", Toast.LENGTH_SHORT).show()
+                            } else {
+                                showDatePicker = false
                             }
-                        }) {
-                            Text("OK")
-                        }
+                        }) { Text("OK") }
                     },
                     dismissButton = {
-                        TextButton(onClick = { showDatePicker = false }) {
-                            Text("Cancel")
-                        }
+                        TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
                     }
                 ) {
                     DateRangePicker(state = datePickerState)
@@ -163,23 +157,10 @@ fun LandingScreen(
                 AlertDialog(
                     onDismissRequest = { showGuestDialog = false },
                     confirmButton = {
-                        TextButton(onClick = {
-                            if (adults > rooms * 4) {
-                                Toast.makeText(
-                                    context,
-                                    "You have $adults adults in $rooms room${if (rooms > 1) "s" else ""}. Make sure the property supports shared rooms.",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                            showGuestDialog = false
-                        }) {
-                            Text("OK")
-                        }
+                        TextButton(onClick = { showGuestDialog = false }) { Text("OK") }
                     },
                     dismissButton = {
-                        TextButton(onClick = { showGuestDialog = false }) {
-                            Text("Cancel")
-                        }
+                        TextButton(onClick = { showGuestDialog = false }) { Text("Cancel") }
                     },
                     title = { Text("Select Rooms & Guests") },
                     text = {
@@ -194,9 +175,7 @@ fun LandingScreen(
                                 Text("$rooms", style = MaterialTheme.typography.titleLarge)
                                 IconButton(onClick = { rooms++ }) { Text("+") }
                             }
-
                             Spacer(modifier = Modifier.height(16.dp))
-
                             Text("Adults")
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -216,7 +195,30 @@ fun LandingScreen(
 
             Button(
                 onClick = {
-                    Toast.makeText(context, "Searching...", Toast.LENGTH_SHORT).show()
+                    coroutineScope.launch {
+                        try {
+                            val searchRequest = HotelSearchRequest(
+                                destination = destination,
+                                check_in = formatter.format(Date(startMillis!!)),
+                                check_out = formatter.format(Date(endMillis!!)),
+                                rooms = rooms,
+                                adults = adults
+                            )
+
+                            val response = RetrofitClient.api.searchAvailableHotels(searchRequest)
+                            if (response.isSuccessful) {
+                                val hotels = response.body() ?: emptyList()
+                                Toast.makeText(context, "Found ${hotels.size} hotels", Toast.LENGTH_SHORT).show()
+                                searchViewModel.setResults(hotels)
+                                navController.navigate("searchResults")
+
+                            } else {
+                                Toast.makeText(context, "Search failed", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 },
                 enabled = destination.isNotBlank() &&
                         startMillis != null &&
