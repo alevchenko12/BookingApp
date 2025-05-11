@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.nasti.frontend.data.api.RetrofitClient
 import com.nasti.frontend.data.repository.AuthRepository
+import com.nasti.frontend.ui.components.BottomNavigationBar
 import com.nasti.frontend.utils.SessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +74,9 @@ fun AuthLandingScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            BottomNavigationBar(navController = navController, selected = "search")
         }
     ) { padding ->
         Column(

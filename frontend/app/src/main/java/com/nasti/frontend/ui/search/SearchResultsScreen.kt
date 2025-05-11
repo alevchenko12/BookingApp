@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +18,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.nasti.frontend.data.model.HotelSearchResult
+import com.nasti.frontend.ui.components.BottomNavigationBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +30,17 @@ fun SearchResultsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Available Hotels") })
+            TopAppBar(
+                title = { Text("Available Hotels") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            BottomNavigationBar(navController = navController, selected = "search")
         }
     ) { padding ->
         Column(
@@ -86,7 +98,7 @@ fun HotelCard(hotel: HotelSearchResult, onClick: () -> Unit) {
                     Row {
                         repeat(it) {
                             Icon(
-                                Icons.Default.Star,
+                                imageVector = Icons.Default.Star,
                                 contentDescription = "Star",
                                 tint = MaterialTheme.colorScheme.primary
                             )
