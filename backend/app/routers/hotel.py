@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 
 from app.config.database import get_db
@@ -9,8 +9,16 @@ from app.crud.hotel import (
     create_hotel, get_hotel_by_id, get_all_hotels,
     delete_hotel, update_hotel, search_hotels, get_hotels_by_owner
 )
+from app.crud.review import get_reviews_for_hotel
 from app.schemas.search import HotelSearchRequest, HotelSearchResult
 from app.services.search import perform_hotel_search
+
+from app.models.hotel import Hotel
+from app.models.city import City
+from app.models.country import Country
+from app.models.review import Review
+from app.models.user import User
+from app.schemas.search_detail import HotelDetailResponse
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
@@ -141,3 +149,48 @@ def search_available_hotels(
     db: Session = Depends(get_db)
 ):
     return perform_hotel_search(db, request)
+
+
+
+
+@router.get("/{hotel_id}/details", response_model=HotelDetailResponse)
+def get_hotel_detail(hotel_id: int, db: Session = Depends(get_db)):
+    hotel = (
+        db.query(Hotel)
+        .options(
+            joinedload(Hotel.city).joinedload(City.country),
+            joinedload(Hotel.photos),
+            joinedload(Hotel.rooms)
+        )
+        .filter(Hotel.id == hotel_id)
+        .first()
+    )
+
+    if not hotel:
+        raise HTTPException(status_code=404, detail="Hotel not found")
+
+    # Get reviews separately via Booking → Room → Hotel
+    reviews = get_reviews_for_hotel(db, hotel_id=hotel_id)
+
+    return {
+        "id": hotel.id,
+        "name": hotel.name,
+        "address": hotel.address,
+        "description": hotel.description,
+        "stars": hotel.stars,
+        "latitude": hotel.latitude,
+        "longitude": hotel.longitude,
+        "city": hotel.city.name,
+        "country": hotel.city.country.name if hotel.city and hotel.city.country else None,
+        "photos": [p.image_url for p in hotel.photos],
+        "rooms": hotel.rooms,
+        "reviews": [
+            {
+                "id": r.id,
+                "rating": r.rating,
+                "text": r.text,
+                "user_name": r.user.first_name if r.user else "Anonymous"
+            }
+            for r in reviews
+        ],
+    }

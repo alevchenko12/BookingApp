@@ -197,10 +197,13 @@ fun LandingScreen(
                 onClick = {
                     coroutineScope.launch {
                         try {
+                            val checkInDate = formatter.format(Date(startMillis!!))
+                            val checkOutDate = formatter.format(Date(endMillis!!))
+
                             val searchRequest = HotelSearchRequest(
                                 destination = destination,
-                                check_in = formatter.format(Date(startMillis!!)),
-                                check_out = formatter.format(Date(endMillis!!)),
+                                check_in = checkInDate,
+                                check_out = checkOutDate,
                                 rooms = rooms,
                                 adults = adults
                             )
@@ -208,10 +211,18 @@ fun LandingScreen(
                             val response = RetrofitClient.api.searchAvailableHotels(searchRequest)
                             if (response.isSuccessful) {
                                 val hotels = response.body() ?: emptyList()
-                                Toast.makeText(context, "Found ${hotels.size} hotels", Toast.LENGTH_SHORT).show()
-                                searchViewModel.setResults(hotels)
-                                navController.navigate("searchResults")
 
+                                // Save context to SearchViewModel
+                                searchViewModel.setSearchContext(
+                                    checkIn = checkInDate,
+                                    checkOut = checkOutDate,
+                                    adults = adults,
+                                    rooms = rooms
+                                )
+
+                                searchViewModel.setResults(hotels)
+                                Toast.makeText(context, "Found ${hotels.size} hotels", Toast.LENGTH_SHORT).show()
+                                navController.navigate("searchResults")
                             } else {
                                 Toast.makeText(context, "Search failed", Toast.LENGTH_SHORT).show()
                             }

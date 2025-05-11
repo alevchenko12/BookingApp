@@ -74,4 +74,8 @@ interface ApiService {
     suspend fun searchAvailableHotels(
         @Body request: HotelSearchRequest
     ): Response<List<HotelSearchResult>>
+
+    @GET("hotels/{hotelId}/details")
+    suspend fun getHotelDetails(@Path("hotelId") hotelId: Int): Response<HotelDetailResponse>
+
 }

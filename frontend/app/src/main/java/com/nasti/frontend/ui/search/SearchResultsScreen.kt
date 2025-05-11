@@ -28,6 +28,11 @@ fun SearchResultsScreen(
 ) {
     val hotels by viewModel.searchResults.collectAsState()
 
+    var currentPage by remember { mutableStateOf(1) }
+    val hotelsPerPage = 10
+    val totalPages = (hotels.size + hotelsPerPage - 1) / hotelsPerPage
+    val pagedHotels = hotels.drop((currentPage - 1) * hotelsPerPage).take(hotelsPerPage)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -51,27 +56,45 @@ fun SearchResultsScreen(
             if (hotels.isEmpty()) {
                 Text("No results found.", style = MaterialTheme.typography.bodyLarge)
             } else {
-                hotels.forEach { hotel ->
+                pagedHotels.forEach { hotel ->
                     HotelCard(hotel = hotel, onClick = {
-                        // TODO: Navigate to hotel details: navController.navigate("hotel/${hotel.id}")
+                        navController.navigate("hotelDetail/${hotel.id}")
                     })
                     Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // Page number buttons
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                ) {
+                    for (page in 1..totalPages) {
+                        TextButton(
+                            onClick = { currentPage = page }
+                        ) {
+                            Text(
+                                text = page.toString(),
+                                fontWeight = if (page == currentPage) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
-
 @Composable
 fun HotelCard(hotel: HotelSearchResult, onClick: () -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+        modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .clickable { onClick() }
+                .padding(16.dp)
+        ) {
             hotel.cover_image_url?.let { imageUrl ->
                 Image(
                     painter = rememberAsyncImagePainter(model = imageUrl),

@@ -110,12 +110,6 @@ def delete_hotel(db: Session, hotel_id: int) -> bool:
         db.rollback()
         return False
 
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func
-from typing import Optional, List
-from app.models.hotel import Hotel
-from app.models.city import City
-
 def search_hotels(
     db: Session,
     country_id: Optional[int] = None,
