@@ -2,6 +2,9 @@
 
 from fastapi import FastAPI
 from app.config.settings import settings
+from fastapi.staticfiles import StaticFiles
+
+import os
 
 # Routers
 from app.routers import city, country, user, user_role, hotel, room, room_availability, hotel_photo, booking, cancellation, payment, review, location
@@ -9,6 +12,10 @@ app = FastAPI(
     title="Booking API",
     version="1.0.0"
 )
+
+UPLOAD_DIR = os.path.join("static", "uploads")
+
+app.mount("/static/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # Register all routers
 app.include_router(user.router)

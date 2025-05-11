@@ -7,15 +7,21 @@ from app.schemas.hotel_photo import HotelPhotoCreate
 
 
 def create_hotel_photo(db: Session, photo_in: HotelPhotoCreate) -> Optional[HotelPhoto]:
-    """Upload and store a new photo for a hotel after verifying hotel exists."""
     hotel = db.query(Hotel).filter(Hotel.id == photo_in.hotel_id).first()
     if not hotel:
-        return None  # Invalid FK — hotel does not exist
+        return None
+
+    # If the uploaded photo is to be a cover, unset others
+    if photo_in.is_cover:
+        db.query(HotelPhoto).filter(
+            HotelPhoto.hotel_id == photo_in.hotel_id,
+            HotelPhoto.is_cover == True
+        ).update({HotelPhoto.is_cover: False})
 
     photo = HotelPhoto(
         image_url=str(photo_in.image_url),
         caption=photo_in.caption.strip() if photo_in.caption else None,
-        is_cover=photo_in.is_cover.strip() if photo_in.is_cover else None,
+        is_cover=photo_in.is_cover or False,
         hotel_id=photo_in.hotel_id
     )
 
@@ -28,8 +34,10 @@ def create_hotel_photo(db: Session, photo_in: HotelPhotoCreate) -> Optional[Hote
         db.rollback()
         return None
 
+
 def get_photo_by_id(db: Session, photo_id: int) -> Optional[HotelPhoto]:
     return db.query(HotelPhoto).filter(HotelPhoto.id == photo_id).first()
+
 
 def get_photos_by_hotel(db: Session, hotel_id: int) -> List[HotelPhoto]:
     """Retrieve all photos for a given hotel."""
@@ -55,11 +63,10 @@ def set_cover_photo(db: Session, hotel_id: int, photo_id: int) -> bool:
     """Set a specific photo as the cover for a hotel (unset all others)."""
     photos = db.query(HotelPhoto).filter(HotelPhoto.hotel_id == hotel_id).all()
     if not any(p.id == photo_id for p in photos):
-        return False  # Provided photo doesn't belong to the hotel
+        return False  # Provided photo doesn't belong to this hotel
 
-    # Unset previous cover
     for photo in photos:
-        photo.is_cover = "yes" if photo.id == photo_id else None
+        photo.is_cover = (photo.id == photo_id)
 
     try:
         db.commit()
