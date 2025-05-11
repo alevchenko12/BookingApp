@@ -19,6 +19,9 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.nasti.frontend.data.model.HotelSearchResult
 import com.nasti.frontend.ui.components.BottomNavigationBar
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +42,7 @@ fun SearchResultsScreen(
                 title = { Text("Available Hotels") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -57,13 +60,12 @@ fun SearchResultsScreen(
                 Text("No results found.", style = MaterialTheme.typography.bodyLarge)
             } else {
                 pagedHotels.forEach { hotel ->
-                    HotelCard(hotel = hotel, onClick = {
+                    HotelCard(hotel = hotel, viewModel = viewModel) {
                         navController.navigate("hotelDetail/${hotel.id}")
-                    })
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // Page number buttons
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
@@ -83,18 +85,19 @@ fun SearchResultsScreen(
         }
     }
 }
+
 @Composable
-fun HotelCard(hotel: HotelSearchResult, onClick: () -> Unit) {
+fun HotelCard(hotel: HotelSearchResult, viewModel: SearchViewModel, onClick: () -> Unit) {
+    val nights = calculateNights(viewModel.checkIn, viewModel.checkOut)
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .clickable { onClick() }
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             hotel.cover_image_url?.let { imageUrl ->
                 Image(
                     painter = rememberAsyncImagePainter(model = imageUrl),
@@ -129,10 +132,26 @@ fun HotelCard(hotel: HotelSearchResult, onClick: () -> Unit) {
                     }
                 }
 
-                hotel.lowest_price?.let {
-                    Text("From $${"%.2f".format(it)}", style = MaterialTheme.typography.bodyMedium)
+                hotel.lowest_price?.let { pricePerNight ->
+                    val totalPrice = pricePerNight * nights
+                    Text(
+                        text = "From $${"%.2f".format(totalPrice)} for $nights night${if (nights > 1) "s" else ""}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
+    }
+}
+
+fun calculateNights(checkIn: String, checkOut: String): Int {
+    return try {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val date1 = sdf.parse(checkIn)
+        val date2 = sdf.parse(checkOut)
+        val diffInMillis = date2.time - date1.time
+        TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS).toInt().coerceAtLeast(1)
+    } catch (e: Exception) {
+        1
     }
 }
