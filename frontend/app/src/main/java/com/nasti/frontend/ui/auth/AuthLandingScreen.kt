@@ -22,6 +22,7 @@ import com.nasti.frontend.utils.SessionManager
 @Composable
 fun AuthLandingScreen(
     navController: NavController,
+    redirect: String = "profile", // ✅ Accept redirect
     viewModel: LoginViewModel = remember {
         LoginViewModel(AuthRepository(RetrofitClient.api))
     }
@@ -58,7 +59,7 @@ fun AuthLandingScreen(
         if (loginResult?.isSuccess == true) {
             val token = loginResult.getOrNull()?.access_token ?: ""
             sessionManager.saveToken(token)
-            navController.navigate("profile") {
+            navController.navigate(redirect) { // ✅ Navigate to the redirect
                 popUpTo("auth") { inclusive = true }
             }
         }

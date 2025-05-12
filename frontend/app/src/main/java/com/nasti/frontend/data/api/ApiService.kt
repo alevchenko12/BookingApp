@@ -78,4 +78,10 @@ interface ApiService {
     @GET("hotels/{hotelId}/details")
     suspend fun getHotelDetails(@Path("hotelId") hotelId: Int): Response<HotelDetailResponse>
 
+    @POST("bookings")
+    suspend fun createBooking(
+        @Header("Authorization") token: String,
+        @Body request: BookingCreateRequest
+    ): Response<BookingResponse>
+
 }

@@ -13,10 +13,9 @@ import androidx.navigation.compose.*
 import com.nasti.frontend.ui.auth.*
 import com.nasti.frontend.ui.landing.LandingScreen
 import com.nasti.frontend.ui.profile.UserProfileScreen
-import com.nasti.frontend.ui.search.SearchResultsScreen
-import com.nasti.frontend.ui.search.SearchViewModel
-import com.nasti.frontend.ui.hotel.HotelDetailScreen
-import com.nasti.frontend.ui.hotel.HotelDetailViewModel
+import com.nasti.frontend.ui.search.*
+import com.nasti.frontend.ui.hotel.*
+import com.nasti.frontend.ui.booking.*
 import com.nasti.frontend.utils.SessionManager
 
 @Composable
@@ -34,8 +33,15 @@ fun AppNavHost(navController: NavHostController) {
             LandingScreen(navController = navController, searchViewModel = searchViewModel)
         }
 
-        composable("auth") {
-            AuthLandingScreen(navController)
+        composable(
+            "auth?redirect={redirect}",
+            arguments = listOf(navArgument("redirect") {
+                defaultValue = "profile"
+                nullable = true
+            })
+        ) { backStackEntry ->
+            val redirect = backStackEntry.arguments?.getString("redirect") ?: "profile"
+            AuthLandingScreen(navController = navController, redirect = redirect)
         }
 
         composable("register") {
@@ -73,7 +79,7 @@ fun AppNavHost(navController: NavHostController) {
                 UserProfileScreen(navController = navController)
             } else {
                 LaunchedEffect(Unit) {
-                    navController.navigate("auth") {
+                    navController.navigate("auth?redirect=profile") {
                         popUpTo("profile") { inclusive = true }
                     }
                 }
@@ -81,14 +87,31 @@ fun AppNavHost(navController: NavHostController) {
         }
 
         composable("searchResults") {
-            SearchResultsScreen(navController = navController, viewModel = searchViewModel)
+            SearchResultsScreen(
+                navController = navController,
+                searchViewModel = searchViewModel
+            )
         }
 
-        // Hotel detail screen
         composable("hotelDetail/{hotelId}") { backStackEntry ->
             val hotelId = backStackEntry.arguments?.getString("hotelId")?.toIntOrNull()
             if (hotelId != null) {
-                HotelDetailScreen(navController = navController, hotelId = hotelId)
+                HotelDetailScreen(
+                    navController = navController,
+                    hotelId = hotelId,
+                    searchViewModel = searchViewModel
+                )
+            }
+        }
+
+        composable("booking/{roomId}") { backStackEntry ->
+            val roomId = backStackEntry.arguments?.getString("roomId")?.toIntOrNull()
+            if (roomId != null) {
+                BookingScreen(
+                    navController = navController,
+                    roomId = roomId,
+                    searchViewModel = searchViewModel
+                )
             }
         }
 

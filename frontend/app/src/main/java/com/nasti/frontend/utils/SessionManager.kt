@@ -32,12 +32,10 @@ class SessionManager(context: Context) {
         return !isTokenExpired(token)
     }
 
-    /*fun isLoggedIn(): Boolean {
-        // ⚠️ FOR TESTING ONLY: Force logout behavior
-        return false
-
-        // return getToken() != null  ← restore this after testing
-    }*/
+    fun isTokenExpired(): Boolean {
+        val token = getToken() ?: return true
+        return isTokenExpired(token)
+    }
 
     private fun isTokenExpired(token: String): Boolean {
         return try {
@@ -52,7 +50,23 @@ class SessionManager(context: Context) {
 
             exp < currentTimeSec
         } catch (e: Exception) {
-            true // If parsing fails, treat token as expired
+            true
+        }
+    }
+
+    // Optional: Extract user ID from JWT if needed later
+    fun getUserIdFromToken(): Int? {
+        return try {
+            val token = getToken() ?: return null
+            val parts = token.split(".")
+            if (parts.size != 3) return null
+
+            val payload = String(Base64.decode(parts[1], Base64.URL_SAFE))
+            val json = JSONObject(payload)
+
+            json.optInt("sub", -1).takeIf { it >= 0 }
+        } catch (e: Exception) {
+            null
         }
     }
 }

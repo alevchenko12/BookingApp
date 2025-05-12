@@ -1,9 +1,9 @@
 package com.nasti.frontend.ui.search
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
@@ -16,7 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.nasti.frontend.data.model.HotelSearchResult
@@ -29,9 +28,9 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun SearchResultsScreen(
     navController: NavController,
-    viewModel: SearchViewModel = viewModel()
+    searchViewModel: SearchViewModel
 ) {
-    val hotels by viewModel.searchResults.collectAsState()
+    val hotels by searchViewModel.searchResults.collectAsState()
 
     var currentPage by remember { mutableStateOf(1) }
     val hotelsPerPage = 10
@@ -40,7 +39,7 @@ fun SearchResultsScreen(
 
     var showFilters by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
-    var selectedSort by remember { mutableStateOf(viewModel.sortBy ?: "") }
+    var selectedSort by remember { mutableStateOf(searchViewModel.sortBy ?: "") }
 
     Scaffold(
         topBar = {
@@ -85,8 +84,8 @@ fun SearchResultsScreen(
                                 text = { Text(option.replace("_", " ").replaceFirstChar { it.uppercaseChar() }) },
                                 onClick = {
                                     selectedSort = option
-                                    viewModel.sortBy = option
-                                    viewModel.performSearch()
+                                    searchViewModel.sortBy = option
+                                    searchViewModel.performSearch()
                                     showSortMenu = false
                                 }
                             )
@@ -102,9 +101,9 @@ fun SearchResultsScreen(
             }
 
             if (showFilters) {
-                FilterSection(viewModel = viewModel, onApply = {
+                FilterSection(viewModel = searchViewModel, onApply = {
                     showFilters = false
-                    viewModel.performSearch()
+                    searchViewModel.performSearch()
                 })
             }
 
@@ -112,7 +111,7 @@ fun SearchResultsScreen(
                 Text("No results found.", style = MaterialTheme.typography.bodyLarge)
             } else {
                 pagedHotels.forEach { hotel ->
-                    HotelCard(hotel = hotel, viewModel = viewModel) {
+                    HotelCard(hotel = hotel, viewModel = searchViewModel) {
                         navController.navigate("hotelDetail/${hotel.id}")
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -120,7 +119,9 @@ fun SearchResultsScreen(
 
                 Row(
                     horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
                 ) {
                     for (page in 1..totalPages) {
                         TextButton(onClick = { currentPage = page }) {
@@ -185,7 +186,12 @@ fun HotelCard(hotel: HotelSearchResult, viewModel: SearchViewModel, onClick: () 
                 }
             }
 
-            Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 hotel.average_rating?.let {
                     Text("⭐ %.1f".format(it), style = MaterialTheme.typography.bodySmall)
                 }
