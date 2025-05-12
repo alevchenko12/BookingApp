@@ -7,10 +7,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
+<<<<<<< HEAD
 fun FilterSection(
     viewModel: SearchViewModel,
     onApply: () -> Unit // <-- new callback
 ) {
+=======
+fun FilterSection(viewModel: SearchViewModel) {
+>>>>>>> 985333f97a20d610b5261bd58ea38b6b72c68e52
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -62,8 +66,12 @@ fun FilterSection(
 
         Button(
             onClick = {
+<<<<<<< HEAD
                 viewModel.triggerSearch()
                 onApply() // <-- hide filter panel
+=======
+                viewModel.triggerSearch() // <- You must define this in your ViewModel
+>>>>>>> 985333f97a20d610b5261bd58ea38b6b72c68e52
             },
             modifier = Modifier.fillMaxWidth()
         ) {

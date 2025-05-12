@@ -38,8 +38,11 @@ fun SearchResultsScreen(
     val pagedHotels = hotels.drop((currentPage - 1) * hotelsPerPage).take(hotelsPerPage)
 
     var showFilters by remember { mutableStateOf(false) }
+<<<<<<< HEAD
     var showSortMenu by remember { mutableStateOf(false) }
     var selectedSort by remember { mutableStateOf(searchViewModel.sortBy ?: "") }
+=======
+>>>>>>> 985333f97a20d610b5261bd58ea38b6b72c68e52
 
     Scaffold(
         topBar = {
@@ -61,10 +64,15 @@ fun SearchResultsScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
+<<<<<<< HEAD
+=======
+            // Sorting and filtering controls
+>>>>>>> 985333f97a20d610b5261bd58ea38b6b72c68e52
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp),
+<<<<<<< HEAD
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Box {
@@ -87,24 +95,54 @@ fun SearchResultsScreen(
                                     searchViewModel.sortBy = option
                                     searchViewModel.performSearch()
                                     showSortMenu = false
+=======
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                var expanded by remember { mutableStateOf(false) }
+                var selectedSort by remember { mutableStateOf(viewModel.sortBy ?: "") }
+
+                Box {
+                    Button(onClick = { expanded = true }) {
+                        Text(if (selectedSort.isBlank()) "Sort" else selectedSort)
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        listOf("price_asc", "price_desc", "rating", "reviews").forEach { option ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(option.replace("_", " ").replaceFirstChar { it.uppercaseChar() })
+                                },
+                                onClick = {
+                                    selectedSort = option
+                                    expanded = false
+                                    viewModel.sortBy = option
+                                    viewModel.triggerSearch()
+>>>>>>> 985333f97a20d610b5261bd58ea38b6b72c68e52
                                 }
                             )
                         }
                     }
                 }
 
+<<<<<<< HEAD
                 TextButton(onClick = { showFilters = !showFilters }) {
                     Icon(Icons.Default.Tune, contentDescription = "Filter")
                     Spacer(modifier = Modifier.width(4.dp))
+=======
+                Button(onClick = { showFilters = !showFilters }) {
+>>>>>>> 985333f97a20d610b5261bd58ea38b6b72c68e52
                     Text(if (showFilters) "Hide Filters" else "Filter")
                 }
             }
 
             if (showFilters) {
+<<<<<<< HEAD
                 FilterSection(viewModel = searchViewModel, onApply = {
                     showFilters = false
                     searchViewModel.performSearch()
                 })
+=======
+                FilterSection(viewModel = viewModel)
+>>>>>>> 985333f97a20d610b5261bd58ea38b6b72c68e52
             }
 
             if (hotels.isEmpty()) {
@@ -186,12 +224,16 @@ fun HotelCard(hotel: HotelSearchResult, viewModel: SearchViewModel, onClick: () 
                 }
             }
 
+<<<<<<< HEAD
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+=======
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+>>>>>>> 985333f97a20d610b5261bd58ea38b6b72c68e52
                 hotel.average_rating?.let {
                     Text("⭐ %.1f".format(it), style = MaterialTheme.typography.bodySmall)
                 }
