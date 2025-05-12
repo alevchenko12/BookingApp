@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -36,6 +38,10 @@ fun SearchResultsScreen(
     val totalPages = (hotels.size + hotelsPerPage - 1) / hotelsPerPage
     val pagedHotels = hotels.drop((currentPage - 1) * hotelsPerPage).take(hotelsPerPage)
 
+    var showFilters by remember { mutableStateOf(false) }
+    var showSortMenu by remember { mutableStateOf(false) }
+    var selectedSort by remember { mutableStateOf(viewModel.sortBy ?: "") }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -56,6 +62,52 @@ fun SearchResultsScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Box {
+                    TextButton(onClick = { showSortMenu = true }) {
+                        Icon(Icons.Default.SwapVert, contentDescription = "Sort")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            if (selectedSort.isNotBlank())
+                                selectedSort.replace("_", " ").replaceFirstChar { it.uppercaseChar() }
+                            else "Sort"
+                        )
+                    }
+
+                    DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
+                        listOf("price_asc", "price_desc", "rating", "reviews").forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.replace("_", " ").replaceFirstChar { it.uppercaseChar() }) },
+                                onClick = {
+                                    selectedSort = option
+                                    viewModel.sortBy = option
+                                    viewModel.performSearch()
+                                    showSortMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                TextButton(onClick = { showFilters = !showFilters }) {
+                    Icon(Icons.Default.Tune, contentDescription = "Filter")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(if (showFilters) "Hide Filters" else "Filter")
+                }
+            }
+
+            if (showFilters) {
+                FilterSection(viewModel = viewModel, onApply = {
+                    showFilters = false
+                    viewModel.performSearch()
+                })
+            }
+
             if (hotels.isEmpty()) {
                 Text("No results found.", style = MaterialTheme.typography.bodyLarge)
             } else {
@@ -71,9 +123,7 @@ fun SearchResultsScreen(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                 ) {
                     for (page in 1..totalPages) {
-                        TextButton(
-                            onClick = { currentPage = page }
-                        ) {
+                        TextButton(onClick = { currentPage = page }) {
                             Text(
                                 text = page.toString(),
                                 fontWeight = if (page == currentPage) FontWeight.Bold else FontWeight.Normal
@@ -114,21 +164,15 @@ fun HotelCard(hotel: HotelSearchResult, viewModel: SearchViewModel, onClick: () 
             Text(hotel.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text("${hotel.address}, ${hotel.city}, ${hotel.country}", style = MaterialTheme.typography.bodySmall)
 
+            Spacer(modifier = Modifier.height(4.dp))
+
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
-                hotel.stars?.let {
-                    Row {
-                        repeat(it) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Star",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                Row {
+                    repeat(hotel.stars ?: 0) {
+                        Icon(Icons.Default.Star, contentDescription = "Star", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
 
@@ -138,6 +182,15 @@ fun HotelCard(hotel: HotelSearchResult, viewModel: SearchViewModel, onClick: () 
                         text = "From $${"%.2f".format(totalPrice)} for $nights night${if (nights > 1) "s" else ""}",
                         style = MaterialTheme.typography.bodyMedium
                     )
+                }
+            }
+
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                hotel.average_rating?.let {
+                    Text("⭐ %.1f".format(it), style = MaterialTheme.typography.bodySmall)
+                }
+                if (hotel.review_count > 0) {
+                    Text("${hotel.review_count} review${if (hotel.review_count != 1) "s" else ""}", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
