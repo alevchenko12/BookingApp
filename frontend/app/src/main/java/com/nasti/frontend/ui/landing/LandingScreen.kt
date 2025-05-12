@@ -205,7 +205,16 @@ fun LandingScreen(
                                 check_in = checkInDate,
                                 check_out = checkOutDate,
                                 rooms = rooms,
-                                adults = adults
+                                adults = adults,
+                                min_stars = null,
+                                has_wifi = null,
+                                allows_pets = null,
+                                has_kitchen = null,
+                                has_air_conditioning = null,
+                                has_tv = null,
+                                has_safe = null,
+                                has_balcony = null,
+                                sort_by = null
                             )
 
                             val response = RetrofitClient.api.searchAvailableHotels(searchRequest)
@@ -214,6 +223,7 @@ fun LandingScreen(
 
                                 // Save context to SearchViewModel
                                 searchViewModel.setSearchContext(
+                                    destination = destination,
                                     checkIn = checkInDate,
                                     checkOut = checkOutDate,
                                     adults = adults,
