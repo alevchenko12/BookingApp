@@ -17,6 +17,12 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+enum class PaymentMethodEnum(val displayName: String) {
+    GooglePay("Google Pay"),
+    Card("Card"),
+    Cash("Cash")
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingScreen(
@@ -29,7 +35,6 @@ fun BookingScreen(
     val scope = rememberCoroutineScope()
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
-    // Dates and guest info from shared SearchViewModel
     val checkIn = searchViewModel.checkIn
     val checkOut = searchViewModel.checkOut
     val adults = searchViewModel.adults
@@ -37,10 +42,12 @@ fun BookingScreen(
     val nights = calculateNights(checkIn, checkOut)
     val bookingDate = dateFormat.format(Date())
 
-    // Local UI state
     var additionalInfo by remember { mutableStateOf(TextFieldValue("")) }
     var isSubmitting by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
+
+    var showPaymentDialog by remember { mutableStateOf(false) }
+    var latestBookingId by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Booking Summary") }) }
@@ -72,7 +79,7 @@ fun BookingScreen(
                 onClick = {
                     scope.launch {
                         if (checkIn.isBlank() || checkOut.isBlank()) {
-                            message = "❗ Please select check-in and check-out dates before booking."
+                            message = "❗ Please select check-in and check-out dates."
                             return@launch
                         }
 
@@ -94,11 +101,12 @@ fun BookingScreen(
                             )
 
                             if (response.isSuccessful) {
+                                message = "✅ Booking successful!"
                                 additionalInfo = TextFieldValue("")
-                                message = "✅ Booking created successfully!"
-                                navController.navigate("profile")
+                                latestBookingId = response.body()?.id // assuming response has booking ID
+                                showPaymentDialog = true
                             } else {
-                                message = "❌ Failed to book: ${response.code()}"
+                                message = "❌ Booking failed: ${response.code()}"
                             }
                         } catch (e: Exception) {
                             message = "⚠️ Error: ${e.localizedMessage}"
@@ -116,6 +124,34 @@ fun BookingScreen(
             message?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = it, color = MaterialTheme.colorScheme.error)
+            }
+
+            if (showPaymentDialog && latestBookingId != null) {
+                AlertDialog(
+                    onDismissRequest = { showPaymentDialog = false },
+                    title = { Text("Choose Payment Method") },
+                    text = {
+                        Column {
+                            Text("How would you like to pay?")
+                            Spacer(modifier = Modifier.height(12.dp))
+                            PaymentMethodEnum.values().forEach { method ->
+                                Button(
+                                    onClick = {
+                                        showPaymentDialog = false
+                                        when (method) {
+                                            PaymentMethodEnum.Cash -> navController.navigate("profile")
+                                            else -> navController.navigate("paymentForm/${latestBookingId}/${method.name}")
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                                ) {
+                                    Text(method.displayName)
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {}
+                )
             }
         }
     }

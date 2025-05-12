@@ -115,6 +115,14 @@ fun AppNavHost(navController: NavHostController) {
             }
         }
 
+        composable("paymentForm/{bookingId}/{method}") { backStackEntry ->
+            val bookingId = backStackEntry.arguments?.getString("bookingId")?.toIntOrNull()
+            val method = backStackEntry.arguments?.getString("method") ?: "Card"
+            if (bookingId != null) {
+                PaymentScreen(navController = navController, bookingId = bookingId, method = method)
+            }
+        }
+
         composable("home") {
             Text(
                 text = "Welcome to Booking App!",

@@ -84,4 +84,10 @@ interface ApiService {
         @Body request: BookingCreateRequest
     ): Response<BookingResponse>
 
+    @POST("payments/")
+    suspend fun createPayment(
+        @Header("Authorization") token: String,
+        @Body request: PaymentCreateRequest
+    ): Response<Unit>
+
 }
