@@ -41,6 +41,9 @@ fun BookingScreen(
     val rooms = searchViewModel.rooms
     val nights = calculateNights(checkIn, checkOut)
     val bookingDate = dateFormat.format(Date())
+    val pricePerNight = searchViewModel.selectedRoomPrice
+    val totalPrice = pricePerNight * nights
+
 
     var additionalInfo by remember { mutableStateOf(TextFieldValue("")) }
     var isSubmitting by remember { mutableStateOf(false) }
@@ -48,6 +51,8 @@ fun BookingScreen(
 
     var showPaymentDialog by remember { mutableStateOf(false) }
     var latestBookingId by remember { mutableStateOf<Int?>(null) }
+
+
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Booking Summary") }) }
@@ -140,10 +145,12 @@ fun BookingScreen(
                                         showPaymentDialog = false
                                         when (method) {
                                             PaymentMethodEnum.Cash -> navController.navigate("profile")
-                                            else -> navController.navigate("paymentForm/${latestBookingId}/${method.name}")
+                                            else -> navController.navigate("paymentForm/${latestBookingId}/${method.displayName}")
                                         }
                                     },
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
                                 ) {
                                     Text(method.displayName)
                                 }

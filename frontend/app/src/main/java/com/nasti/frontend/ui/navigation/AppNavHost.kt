@@ -119,7 +119,12 @@ fun AppNavHost(navController: NavHostController) {
             val bookingId = backStackEntry.arguments?.getString("bookingId")?.toIntOrNull()
             val method = backStackEntry.arguments?.getString("method") ?: "Card"
             if (bookingId != null) {
-                PaymentScreen(navController = navController, bookingId = bookingId, method = method)
+                PaymentScreen(
+                    navController = navController,
+                    bookingId = bookingId,
+                    method = method,
+                    searchViewModel = searchViewModel
+                )
             }
         }
 

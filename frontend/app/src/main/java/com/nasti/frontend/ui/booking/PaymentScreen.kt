@@ -15,27 +15,35 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.nasti.frontend.data.api.RetrofitClient
 import com.nasti.frontend.data.model.PaymentCreateRequest
+import com.nasti.frontend.ui.search.SearchViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(
     navController: NavController,
     bookingId: Int,
-    method: String // Expecting "Card" or "GooglePay"
+    method: String,
+    searchViewModel: SearchViewModel
 ) {
     val context = LocalContext.current
     val session = remember { SessionManager(context) }
     val scope = rememberCoroutineScope()
     val today = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) }
 
-    var amount by remember { mutableStateOf(TextFieldValue("")) }
+    val nights = calculateNights(searchViewModel.checkIn, searchViewModel.checkOut)
+    val totalAmount = remember { (searchViewModel.selectedRoomPrice * nights).coerceAtLeast(0.0) }
+
     var isSubmitting by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
 
+    // Sanitize method: Match passed string to one of the valid enum display names
+    val validMethod = remember(method) {
+        PaymentMethodEnum.values().firstOrNull { it.displayName.equals(method, ignoreCase = true) }?.displayName
+            ?: "Card" // default fallback
+    }
+
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Payment: $method") })
-        }
+        topBar = { TopAppBar(title = { Text("Payment: $validMethod") }) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -44,15 +52,16 @@ fun PaymentScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Top
         ) {
-            Text("Booking ID: $bookingId")
-            Text("Payment Method: $method")
-            Spacer(modifier = Modifier.height(16.dp))
+            Text("💳 Payment Method: $validMethod", style = MaterialTheme.typography.bodyLarge)
+            Text("💰 Total Price: $${"%.2f".format(totalAmount)}", style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
+                value = "%.2f".format(totalAmount),
+                onValueChange = {},
                 label = { Text("Amount (USD)") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -61,12 +70,6 @@ fun PaymentScreen(
                 onClick = {
                     scope.launch {
                         val token = session.getToken()
-                        val amountValue = amount.text.toDoubleOrNull()
-
-                        if (amountValue == null || amountValue <= 0.0) {
-                            message = "Please enter a valid amount"
-                            return@launch
-                        }
 
                         isSubmitting = true
                         message = null
@@ -75,8 +78,8 @@ fun PaymentScreen(
                             val paymentRequest = PaymentCreateRequest(
                                 booking_id = bookingId,
                                 payment_date = today,
-                                payment_method = method,
-                                amount = amountValue
+                                payment_method = validMethod,
+                                amount = totalAmount
                             )
 
                             val response = RetrofitClient.api.createPayment(
@@ -85,13 +88,13 @@ fun PaymentScreen(
                             )
 
                             if (response.isSuccessful) {
-                                message = "Payment successful!"
+                                message = "✅ Payment successful!"
                                 navController.navigate("profile")
                             } else {
-                                message = "Payment failed: ${response.code()}"
+                                message = "❌ Payment failed: ${response.code()}"
                             }
                         } catch (e: Exception) {
-                            message = "Error: ${e.localizedMessage}"
+                            message = "⚠️ Error: ${e.localizedMessage}"
                         } finally {
                             isSubmitting = false
                         }
@@ -105,7 +108,7 @@ fun PaymentScreen(
 
             message?.let {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = it, color = MaterialTheme.colorScheme.error)
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
         }
     }

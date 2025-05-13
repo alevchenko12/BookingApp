@@ -52,6 +52,13 @@ class SearchViewModel : ViewModel() {
         this.rooms = rooms
     }
 
+    private var _selectedRoomPrice: Double = 0.0
+    val selectedRoomPrice get() = _selectedRoomPrice
+
+    fun setSelectedRoomPrice(price: Double) {
+        _selectedRoomPrice = price
+    }
+
     fun setFiltersAndSorting(
         minStars: Int? = null,
         hasWifi: Boolean? = null,
@@ -118,5 +125,4 @@ class SearchViewModel : ViewModel() {
             }
         }
     }
-
 }
