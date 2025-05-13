@@ -11,10 +11,12 @@ from app.crud.booking import (
     get_bookings_by_user,
     cancel_booking,
     mark_booking_as_confirmed,
-    complete_and_cleanup_bookings
+    complete_and_cleanup_bookings,
+    get_user_bookings_ui
 )
 from app.models.user import User
 from app.dependencies.auth import get_current_user
+from app.schemas.enriched_booking import BookingUiModel 
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
@@ -133,3 +135,14 @@ def confirm_existing_booking(
 def trigger_booking_cleanup(db: Session = Depends(get_db)):
     result = complete_and_cleanup_bookings(db)
     return result
+
+@router.get("/", response_model=List[BookingUiModel])
+def get_user_bookings(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns detailed bookings (with hotel, address, city, country, image, price) for the current user.
+    """
+    bookings = get_user_bookings_ui(db=db, user_id=current_user.id)
+    return bookings

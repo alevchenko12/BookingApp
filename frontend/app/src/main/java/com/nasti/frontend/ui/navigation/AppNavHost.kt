@@ -135,5 +135,11 @@ fun AppNavHost(navController: NavHostController) {
                 modifier = Modifier.padding(32.dp)
             )
         }
+
+        composable("bookings") {
+            val bookingViewModel: com.nasti.frontend.ui.mybookings.BookingListViewModel = viewModel()
+            BookingListScreen(navController = navController, viewModel = bookingViewModel)
+        }
+
     }
 }

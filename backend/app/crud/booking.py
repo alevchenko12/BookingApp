@@ -191,3 +191,61 @@ def complete_and_cleanup_bookings(db: Session) -> dict:
         "completed_bookings": completed_count,
         "cancelled_pending_bookings": cancelled_count
     }
+
+from sqlalchemy.orm import Session
+from typing import List
+from app.models.booking import Booking
+from app.models.hotel import Hotel
+from app.models.city import City
+from app.models.country import Country
+from app.models.room import Room
+from app.models.payment import Payment
+from app.models.hotel_photo import HotelPhoto
+from app.schemas.enriched_booking import BookingUiModel
+
+
+def get_user_bookings_ui(db: Session, user_id: int) -> List[BookingUiModel]:
+    bookings = db.query(Booking).filter(Booking.user_id == user_id).all()
+    ui_models = []
+
+    for booking in bookings:
+        if not booking.room:
+            continue
+
+        room = booking.room
+        hotel = room.hotel
+        if not hotel:
+            continue
+
+        city = hotel.city
+        country = city.country if city else None
+
+        cover_photo = (
+            db.query(HotelPhoto)
+            .filter(HotelPhoto.hotel_id == hotel.id, HotelPhoto.is_cover == True)
+            .first()
+        )
+
+        payment = db.query(Payment).filter(Payment.booking_id == booking.id).first()
+        total_price = f"${payment.amount:.2f}" if payment else None
+
+        ui_models.append(
+            BookingUiModel(
+                id=booking.id,
+                hotel_name=hotel.name,
+                address=hotel.address,
+                city=city.name if city else "",
+                country=country.name if country else "",
+                check_in=booking.check_in_date.isoformat(),
+                check_out=booking.check_out_date.isoformat(),
+                booking_date=booking.booking_date.isoformat(),
+                total_price=total_price,
+                status=booking.status,
+                cover_image_url=cover_photo.image_url if cover_photo else None,
+                cancellation_policy=room.cancellation_policy,
+                latitude=hotel.latitude,
+                longitude=hotel.longitude
+            )
+        )
+
+    return ui_models

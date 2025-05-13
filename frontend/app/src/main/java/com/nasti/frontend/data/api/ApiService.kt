@@ -90,4 +90,9 @@ interface ApiService {
         @Body request: PaymentCreateRequest
     ): Response<Unit>
 
+    @GET("bookings")
+    suspend fun getMyBookings(
+        @Header("Authorization") token: String
+    ): Response<List<BookingUiModel>>
+
 }
