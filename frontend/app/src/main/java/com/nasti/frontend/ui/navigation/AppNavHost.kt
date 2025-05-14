@@ -16,6 +16,7 @@ import com.nasti.frontend.ui.profile.UserProfileScreen
 import com.nasti.frontend.ui.search.*
 import com.nasti.frontend.ui.hotel.*
 import com.nasti.frontend.ui.booking.*
+import com.nasti.frontend.ui.review.*
 import com.nasti.frontend.utils.SessionManager
 
 @Composable
@@ -139,6 +140,13 @@ fun AppNavHost(navController: NavHostController) {
         composable("bookings") {
             val bookingViewModel: com.nasti.frontend.ui.mybookings.BookingListViewModel = viewModel()
             BookingListScreen(navController = navController, viewModel = bookingViewModel)
+        }
+
+        composable("addReview/{bookingId}") { backStackEntry ->
+            val bookingId = backStackEntry.arguments?.getString("bookingId")?.toIntOrNull()
+            if (bookingId != null) {
+                SubmitReviewScreen(navController = navController, bookingId = bookingId)
+            }
         }
 
     }

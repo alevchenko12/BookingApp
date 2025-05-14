@@ -101,4 +101,10 @@ interface ApiService {
         @Path("bookingId") bookingId: Int
     ): Response<Map<String, String>>
 
+    @POST("reviews/")
+    suspend fun submitReview(
+        @Header("Authorization") token: String,
+        @Body request: ReviewCreateRequest
+    ): Response<ReviewResponse> // or Response<Unit> if no response body
+
 }
