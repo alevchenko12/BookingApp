@@ -95,4 +95,10 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<List<BookingUiModel>>
 
+    @POST("bookings/my-bookings/{bookingId}/cancel")
+    suspend fun cancelBooking(
+        @Header("Authorization") token: String,
+        @Path("bookingId") bookingId: Int
+    ): Response<Map<String, String>>
+
 }

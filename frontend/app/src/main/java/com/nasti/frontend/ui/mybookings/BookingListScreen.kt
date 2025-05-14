@@ -21,6 +21,9 @@ import com.nasti.frontend.ui.mybookings.BookingListViewModel
 import com.nasti.frontend.data.model.BookingUiModel
 import com.nasti.frontend.ui.search.calculateNights
 import com.nasti.frontend.utils.SessionManager
+import com.nasti.frontend.data.api.RetrofitClient
+import kotlinx.coroutines.launch
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +44,7 @@ fun BookingListScreen(
     val bookings by viewModel.bookings.collectAsState()
     val selectedStatus by viewModel.selectedStatus.collectAsState()
 
-    val statuses = listOf("all", "pending", "confirmed", "completed", "cancelled") // removed "paid"
+    val statuses = listOf("all", "pending", "confirmed", "completed", "cancelled")
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("My Bookings") }) },
@@ -73,7 +76,16 @@ fun BookingListScreen(
                     .padding(8.dp)
             ) {
                 items(filtered) { booking ->
-                    BookingCard(booking)
+                    BookingCard(
+                        booking = booking,
+                        onCancelSuccess = {
+                            val token = session.getToken()
+                            if (!token.isNullOrBlank()) {
+                                viewModel.loadBookings(token)
+                            }
+                            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                        }
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             }
@@ -82,10 +94,19 @@ fun BookingListScreen(
 }
 
 @Composable
-fun BookingCard(booking: BookingUiModel) {
+fun BookingCard(
+    booking: BookingUiModel,
+    onCancelSuccess: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val session = remember { SessionManager(context) }
+    val scope = rememberCoroutineScope()
+
     val nights = if (!booking.checkIn.isNullOrBlank() && !booking.checkOut.isNullOrBlank()) {
         calculateNights(booking.checkIn, booking.checkOut)
     } else 1
+
+    var isCancelling by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -122,6 +143,43 @@ fun BookingCard(booking: BookingUiModel) {
             }
 
             Text("🔖 Status: ${booking.status.replaceFirstChar { it.uppercaseChar() }}", color = MaterialTheme.colorScheme.primary)
+
+            // Cancel button for eligible statuses
+            if (booking.status.lowercase() in listOf("pending", "confirmed")) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    onClick = {
+                        scope.launch {
+                            isCancelling = true
+                            try {
+                                val token = session.getToken()
+                                val response = com.nasti.frontend.data.api.RetrofitClient.api.cancelBooking(
+                                    token = "Bearer $token",
+                                    bookingId = booking.id
+                                )
+                                if (response.isSuccessful) {
+                                    val msg = if (booking.cancellationPolicy.equals("Flexible", ignoreCase = true)) {
+                                        val halfRefund = booking.totalPrice?.replace("$", "")?.toDoubleOrNull()?.div(2)
+                                        "✅ Booking cancelled. You'll be refunded $${"%.2f".format(halfRefund)}. This is the hotel's policy."
+                                    } else {
+                                        "⚠️ Booking cancelled. This booking is non-refundable. This is the hotel's policy."
+                                    }
+                                    onCancelSuccess(msg)
+                                } else {
+                                    onCancelSuccess("❌ Cancellation failed. Please try again.")
+                                }
+                            } catch (e: Exception) {
+                                onCancelSuccess("❌ Error: ${e.localizedMessage}")
+                            } finally {
+                                isCancelling = false
+                            }
+                        }
+                    },
+                    enabled = !isCancelling
+                ) {
+                    Text("Cancel")
+                }
+            }
         }
     }
 }
