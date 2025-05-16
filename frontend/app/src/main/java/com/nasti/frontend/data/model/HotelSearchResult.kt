@@ -10,8 +10,6 @@ data class HotelSearchResult(
     val lowest_price: Double?,
     val cover_image_url: String?,
     val available_room_ids: List<Int>,
-
-    // New fields to support filtering and sorting
     val review_count: Int = 0,
     val average_rating: Double? = null
 )

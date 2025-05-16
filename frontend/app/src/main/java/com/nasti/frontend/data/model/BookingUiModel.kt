@@ -15,7 +15,7 @@ data class BookingUiModel(
     val status: String,
     @SerializedName("cancellation_policy") val cancellationPolicy: String?,
     @SerializedName("cover_image_url") val coverImageUrl: String?,
-    @SerializedName("latitude") val latitude: Double?,   // optional
-    @SerializedName("longitude") val longitude: Double?  // optional
+    @SerializedName("latitude") val latitude: Double?,
+    @SerializedName("longitude") val longitude: Double?
 )
 

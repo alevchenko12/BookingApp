@@ -36,10 +36,9 @@ fun PaymentScreen(
     var isSubmitting by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
 
-    // Sanitize method: Match passed string to one of the valid enum display names
     val validMethod = remember(method) {
         PaymentMethodEnum.values().firstOrNull { it.displayName.equals(method, ignoreCase = true) }?.displayName
-            ?: "Card" // default fallback
+            ?: "Card" 
     }
 
     Scaffold(

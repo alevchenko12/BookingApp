@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FilterSection(
     viewModel: SearchViewModel,
-    onApply: () -> Unit // <-- new callback
+    onApply: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -63,7 +63,7 @@ fun FilterSection(
         Button(
             onClick = {
                 viewModel.triggerSearch()
-                onApply() // <-- hide filter panel
+                onApply() 
             },
             modifier = Modifier.fillMaxWidth()
         ) {

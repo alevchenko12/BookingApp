@@ -5,6 +5,6 @@ data class BookingCreateRequest(
     val booking_date: String,     // Format: "yyyy-MM-dd"
     val check_in_date: String,
     val check_out_date: String,
-    val status: String = "pending", // Defaulted on backend, still useful for consistency
+    val status: String = "pending",
     val additional_info: String? = null
 )

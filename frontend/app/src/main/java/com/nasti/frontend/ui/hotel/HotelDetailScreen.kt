@@ -170,10 +170,8 @@ fun HotelDetailContent(
                                 if (checkIn.isBlank() || checkOut.isBlank()) {
                                     Toast.makeText(context, "Please select dates before booking", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    // Save room price to context
                                     searchViewModel.setSelectedRoomPrice(room.price_per_night)
 
-                                    // Navigate depending on login status
                                     if (session.isLoggedIn()) {
                                         navController.navigate(route)
                                     } else {

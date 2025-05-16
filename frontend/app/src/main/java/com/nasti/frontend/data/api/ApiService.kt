@@ -42,7 +42,7 @@ interface ApiService {
     @GET("users/verify-registration")
     suspend fun verifyEmail(
         @Query("token") token: String
-    ): retrofit2.Response<Unit>
+    ): Response<Unit>
 
     // Register initiating
     @POST("users/register-initiate")
@@ -70,37 +70,44 @@ interface ApiService {
     @GET("locations/search")
     suspend fun searchLocations(@Query("q") query: String): Response<List<Map<String, Any>>>
 
+    // Search available hotels
     @POST("hotels/search-available")
     suspend fun searchAvailableHotels(
         @Body request: HotelSearchRequest
     ): Response<List<HotelSearchResult>>
 
+    // View hotel info
     @GET("hotels/{hotelId}/details")
     suspend fun getHotelDetails(@Path("hotelId") hotelId: Int): Response<HotelDetailResponse>
 
+    // Make booking
     @POST("bookings")
     suspend fun createBooking(
         @Header("Authorization") token: String,
         @Body request: BookingCreateRequest
     ): Response<BookingResponse>
 
+    // Make payment
     @POST("payments/")
     suspend fun createPayment(
         @Header("Authorization") token: String,
         @Body request: PaymentCreateRequest
     ): Response<Unit>
 
+    // Get current users bookings
     @GET("bookings")
     suspend fun getMyBookings(
         @Header("Authorization") token: String
     ): Response<List<BookingUiModel>>
 
+    // Cancel booking
     @POST("bookings/my-bookings/{bookingId}/cancel")
     suspend fun cancelBooking(
         @Header("Authorization") token: String,
         @Path("bookingId") bookingId: Int
     ): Response<Map<String, String>>
 
+    // Submit review
     @POST("reviews/")
     suspend fun submitReview(
         @Header("Authorization") token: String,

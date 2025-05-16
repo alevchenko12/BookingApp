@@ -17,7 +17,7 @@ data class HotelSearchRequest(
     val has_safe: Boolean? = null,
     val has_balcony: Boolean? = null,
 
-    // Optional room type filter (if supported on backend)
+    // Optional room type filter
     val room_type: String? = null, // e.g., "Single", "Double", "Suite"
 
     // Optional sorting

@@ -221,7 +221,6 @@ fun LandingScreen(
                             if (response.isSuccessful) {
                                 val hotels = response.body() ?: emptyList()
 
-                                // Save context to SearchViewModel
                                 searchViewModel.setSearchContext(
                                     destination = destination,
                                     checkIn = checkInDate,
