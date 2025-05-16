@@ -1,0 +1,72 @@
+git rm -r --cached .### Android / Kotlin / IntelliJ IDEA Git Ignore ###
+
+# Ignore Android Studio and IntelliJ project files
+.idea/
+*.iml
+
+# Ignore build folders (auto-generated)
+build/
+out/
+captures/
+
+# Ignore Gradle files
+.gradle/
+local.properties
+**/gradle.properties
+**/gradle-wrapper.jar
+**/gradle-wrapper.properties
+
+# Ignore logs and temp files
+*.log
+*.tmp
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Ignore unnecessary dependency directories
+node_modules/
+platforms/
+.cordova/
+.vscode/
+
+# Ignore test coverage reports
+coverage/
+*.lcov
+
+# Ignore APKs, AABs, and generated files
+*.apk
+*.aab
+*.dex
+*.so
+*.o
+*.obj
+
+# Ignore ProGuard & Lint reports
+lint/
+lint-results.xml
+proguard/
+proguard-rules.pro
+
+# Ignore Firebase, Google Services, and Secrets
+google-services.json
+*.keystore
+*.jks
+fabric.properties
+
+# Ignore Jetpack Compose compiler cache
+/.caches/
+
+# Ignore any other temporary IDE files
+*.~*
+
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore Alembic compiled Python files
+alembic/versions/__pycache__/
+*.pyc
+*.pyo
