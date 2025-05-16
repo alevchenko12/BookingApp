@@ -1,5 +1,3 @@
-# app/schemas/country.py
-
 from typing import Annotated, List, TYPE_CHECKING
 from pydantic import BaseModel, StringConstraints
 
@@ -26,6 +24,6 @@ class CountryWithCities(CountryRead):
     class Config:
         orm_mode = True
 
-# ✅ Import after all class definitions to resolve forward reference
+# Import after all class definitions to resolve forward reference
 from app.schemas.city import CityRead
 CountryWithCities.model_rebuild()

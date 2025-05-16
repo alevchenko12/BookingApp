@@ -32,6 +32,6 @@ class ReviewWithRelations(ReviewRead):
     class Config:
         orm_mode = True
 
-# ✅ Resolve forward references
+# Resolve forward references
 from app.schemas.booking import BookingRead
 ReviewWithRelations.model_rebuild()

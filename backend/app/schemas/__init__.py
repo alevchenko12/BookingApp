@@ -16,6 +16,5 @@ from .country import CountryRead
 from .city import CityRead
 # Reviews
 from .review import ReviewRead, ReviewWithRelations
-# app/schemas/__init__.py
-# Hiotel Detail 
+# Hotel Detail 
 from .search_detail import HotelDetailResponse

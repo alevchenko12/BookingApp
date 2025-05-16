@@ -1,4 +1,3 @@
-# ✅ hotel schema (app/schemas/hotel.py)
 from __future__ import annotations
 from typing import Annotated, Optional, TYPE_CHECKING, List
 from pydantic import BaseModel, Field, StringConstraints

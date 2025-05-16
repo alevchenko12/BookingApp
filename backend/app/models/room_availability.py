@@ -1,4 +1,3 @@
-# RoomAvailability Model (room_availability.py)
 from sqlalchemy import Column, Integer, Date, Boolean, Float, ForeignKey, String
 from sqlalchemy.orm import relationship
 from app.config.database import Base

@@ -1,5 +1,3 @@
-# services/auth_service.py
-
 from datetime import datetime, timedelta
 from datetime import datetime, timezone
 from typing import Optional

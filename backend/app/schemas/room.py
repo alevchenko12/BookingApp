@@ -5,7 +5,7 @@ from typing import Optional, Annotated, TYPE_CHECKING
 from pydantic import BaseModel, Field, StringConstraints
 
 if TYPE_CHECKING:
-    pass  # Removed HotelRead to break circular import
+    pass 
 
 # -----------------------
 # ENUMS

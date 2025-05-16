@@ -23,7 +23,7 @@ from app.schemas.search_detail import HotelDetailResponse
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
 
-# 🧪 MOCK AUTH (replace with real auth)
+# MOCK AUTH (replace with real auth)
 def get_current_user() -> User:
     return User(id=1, first_name="Test", last_name="User", email="test@example.com", password_hash="...")
 
