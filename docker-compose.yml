@@ -7,10 +7,11 @@ services:
       - "8000:8000"
     environment:
       DB_USER: root
-      DB_PASSWORD: courseWORK%402025
+      DB_PASSWORD: "courseWORK@2025"
       DB_NAME: booking_db
       DB_HOST: mysql
       DB_PORT: 3306
+      DATABASE_URL: "mysql+pymysql://root:courseWORK%402025@mysql:3306/booking_db"
       SECRET_KEY: ZW3-oX2r5GfQJ8YN93_Jip498bTNz5Xg-q7Xqs0Yq5g
       JWT_ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 60
@@ -25,8 +26,9 @@ services:
   mysql:
     image: mysql:8.0
     restart: always
+    command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: courseWORK%402025
+      MYSQL_ROOT_PASSWORD: "courseWORK@2025"
       MYSQL_DATABASE: booking_db
     ports:
       - "3306:3306"
