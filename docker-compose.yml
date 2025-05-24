@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DB_USER: root
+      DB_PASSWORD: courseWORK%402025
+      DB_NAME: booking_db
+      DB_HOST: mysql
+      DB_PORT: 3306
+      SECRET_KEY: ZW3-oX2r5GfQJ8YN93_Jip498bTNz5Xg-q7Xqs0Yq5g
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      SMTP_USER: booking.mobapp.noreply@gmail.com
+      SMTP_PASSWORD: hrqd vsbn mixn tdfo
+      SMTP_SERVER: smtp.gmail.com
+      SMTP_PORT: 587
+      EMAIL_FROM_NAME: Booking App
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: courseWORK%402025
+      MYSQL_DATABASE: booking_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db_dump.sql:/docker-entrypoint-initdb.d/db_dump.sql
+
+volumes:
+  mysql_data:
