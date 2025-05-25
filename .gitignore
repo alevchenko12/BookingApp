@@ -12,7 +12,6 @@ captures/
 # Ignore Gradle files
 .gradle/
 local.properties
-**/gradle.properties
 **/gradle-wrapper.jar
 **/gradle-wrapper.properties
 
