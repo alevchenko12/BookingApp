@@ -17,7 +17,7 @@ def save_image_to_disk(file: UploadFile) -> str:
 
 def generate_image_url(filename: str) -> str:
     # Fix: Return full absolute URL
-    return f"http://10.0.2.2:8000/static/uploads/{filename}"
+    return f"http://192.168.1.104:8000/static/uploads/{filename}"
 
 def delete_image_file(image_url: str):
     filename = image_url.split("/")[-1]
